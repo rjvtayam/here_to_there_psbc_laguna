@@ -79,13 +79,16 @@
 - Role-based access: Principal, Admin, Teacher, Staff
 
 ### 🔐 Security
-- JWT-based authentication with access & refresh tokens
+- JWT authentication with HTTP-only cookies + Bearer header (dual mode)
 - Two-Factor Authentication (TOTP with QR code)
+- Account lockout after 5 failed login attempts
+- Failed login audit logging with IP tracking
 - Password strength enforcement (uppercase, lowercase, number, special char)
-- Rate limiting on all endpoints
+- Rate limiting on all auth endpoints
 - HTTP security headers (HSTS, CSP, X-Frame-Options)
 - SQL injection prevention via SQLAlchemy ORM
 - Input validation and sanitization
+- Field-level AES-256-GCM encryption for sensitive data
 
 ### 👥 User Management
 - Admin dashboard with user CRUD operations
@@ -332,10 +335,11 @@ Once the backend is running, access the interactive API docs:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/auth/login` | Authenticate user |
+| `POST` | `/api/v1/auth/login` | Authenticate user (returns 2FA flag if enabled) |
 | `POST` | `/api/v1/auth/2fa-login` | Verify 2FA code |
 | `POST` | `/api/v1/auth/register` | Register new user |
 | `POST` | `/api/v1/auth/refresh` | Refresh access token |
+| `POST` | `/api/v1/auth/logout` | Clear auth cookies |
 | `GET` | `/api/v1/auth/me` | Get current user profile |
 | `PUT` | `/api/v1/profile/me` | Update profile |
 | `POST` | `/api/v1/profile/change-password` | Change password |
@@ -367,16 +371,23 @@ Once the backend is running, access the interactive API docs:
 
 ## 🔒 Security Features
 
-- **JWT Authentication** with short-lived access tokens and refresh rotation
-- **Two-Factor Authentication** via TOTP (Google Authenticator compatible)
-- **Password Policy** — minimum 8 characters with uppercase, lowercase, number, and special character
-- **Rate Limiting** — 10 req/min on login, 5 req/min on registration
-- **HTTP Security Headers** — HSTS, X-Frame-Options, X-Content-Type-Options, CSP
-- **CORS Protection** — restricted to configured origins
-- **SQL Injection Prevention** — SQLAlchemy ORM parameterized queries
-- **Input Validation** — Pydantic schemas for all API inputs
-- **File Upload Security** — magic byte detection, path traversal prevention, 5MB limit
-- **Audit Logging** — all sensitive actions logged with IP address
+| Feature | Description |
+|---------|-------------|
+| **JWT Authentication** | Short-lived access tokens (30 min) with refresh token rotation (7 days) |
+| **HTTP-Only Cookies** | Tokens stored in HttpOnly, Secure, SameSite=Strict cookies + Bearer header (dual mode) |
+| **Two-Factor Authentication** | TOTP-based 2FA with QR code setup (Google Authenticator compatible) |
+| **Account Lockout** | Automatic lockout after 5 failed login attempts (30-minute cooldown) |
+| **Failed Login Logging** | All failed attempts logged with email, IP address, and attempt count |
+| **Password Policy** | Minimum 8 characters with uppercase, lowercase, number, and special character |
+| **Rate Limiting** | 10 req/min login, 5 req/min register, 5 req/min password change |
+| **HTTP Security Headers** | HSTS, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy, Permissions-Policy |
+| **CORS Protection** | Strict origin allowlist for HTTP and Socket.IO connections |
+| **SQL Injection Prevention** | SQLAlchemy ORM with parameterized queries |
+| **Input Validation** | Pydantic schemas for all API inputs, length limits on chat/emergency messages |
+| **File Upload Security** | Server-side magic byte detection, path traversal prevention, 5MB limit |
+| **Audit Logging** | Login success/failure, profile changes, password changes, 2FA changes — all with IP |
+| **Database Connection Pooling** | QueuePool with 10 connections, 20 overflow, 1800s recycle, health checks |
+| **Field-Level Encryption** | AES-256-GCM encryption utility for sensitive data at rest |
 
 ---
 
