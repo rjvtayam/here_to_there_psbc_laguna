@@ -1,0 +1,1246 @@
+import { useState, useEffect, useRef } from 'react';
+import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { useAuthStore } from '../../stores/authStore';
+import { useSettingsStore, type SettingsState } from '../../stores/settingsStore';
+import { profileApi } from '../../api/profile.api';
+import { User as UserType, ActivityLog } from '../../types/user';
+import {
+  Save, Shield, Bell, User, Building2, Monitor, AudioLines,
+  Wifi, Globe, Volume2, VolumeX, RefreshCw, Camera, CameraOff, Aperture,
+  Circle, Square, Download, Trash2, Film, Clock, HardDrive, Play,
+  Mic, MicOff, Speaker, Phone, Mail, Lock, History, CheckCircle2,
+  AlertCircle, LogIn, Key, Edit3, Eye, EyeOff, X
+} from 'lucide-react';
+
+function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void }) {
+  return (
+    <button
+      onClick={onChange}
+      className={`relative w-12 h-6 rounded-full transition-all duration-300 flex-shrink-0 ${enabled ? 'bg-primary-600 shadow-lg shadow-primary-500/20' : 'bg-gray-700'}`}
+    >
+      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-300 shadow-md ${enabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+    </button>
+  );
+}
+
+function SettingRow({ icon, iconBg, label, description, children }: {
+  icon: React.ReactNode; iconBg: string; label: string; description: string; children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
+          {icon}
+        </div>
+        <div>
+          <p className="text-white font-medium text-sm">{label}</p>
+          <p className="text-gray-500 text-xs">{description}</p>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+type Tab = 'profile' | 'video' | 'recording' | 'audio' | 'connection' | 'notifications';
+type ProfileSubTab = 'personal' | 'security' | 'activity';
+
+const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
+  { key: 'profile', label: 'Profile', icon: <User size={14} /> },
+  { key: 'video', label: 'Video', icon: <Monitor size={14} /> },
+  { key: 'recording', label: 'Recording', icon: <Film size={14} /> },
+  { key: 'audio', label: 'Audio', icon: <AudioLines size={14} /> },
+  { key: 'connection', label: 'Connection', icon: <Wifi size={14} /> },
+  { key: 'notifications', label: 'Notifications', icon: <Bell size={14} /> },
+];
+
+const PROFILE_SUB_TABS: { key: ProfileSubTab; label: string; icon: React.ReactNode }[] = [
+  { key: 'personal', label: 'Personal Info', icon: <User size={12} /> },
+  { key: 'security', label: 'Security', icon: <Lock size={12} /> },
+  { key: 'activity', label: 'Activity Log', icon: <History size={12} /> },
+];
+
+export function SettingsPage() {
+  const { user, updateUser } = useAuthStore();
+  const settings = useSettingsStore();
+  const [activeTab, setActiveTab] = useState<Tab>('profile');
+  const [profileSubTab, setProfileSubTab] = useState<ProfileSubTab>('personal');
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    settings.loadSettings();
+  }, []);
+
+  const handleSave = () => {
+    settings.saveSettings();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const showSaveButtons = activeTab !== 'profile' || profileSubTab === 'personal';
+
+  return (
+    <DashboardLayout>
+      <div className="p-6 max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary-500/15 border border-primary-500/20 flex items-center justify-center">
+              <Shield size={20} className="text-primary-400" />
+            </div>
+            <div>
+              <h1 className="font-orbitron text-2xl font-bold text-white">Settings</h1>
+              <p className="text-gray-500 text-sm">Manage your account and preferences</p>
+            </div>
+          </div>
+          <Badge variant="info">{user?.role?.toUpperCase()}</Badge>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 p-1 bg-gray-900/80 backdrop-blur-xl rounded-xl border border-gray-800/60 overflow-x-auto">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                activeTab === tab.key
+                  ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30'
+                  : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800/50'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'profile' && <ProfileSection user={user} updateUser={updateUser} activeSubTab={profileSubTab} onSubTabChange={setProfileSubTab} />}
+        {activeTab === 'video' && <VideoTab settings={settings} />}
+        {activeTab === 'recording' && <RecordingTab />}
+        {activeTab === 'audio' && <AudioTab settings={settings} />}
+        {activeTab === 'connection' && <ConnectionTab settings={settings} />}
+        {activeTab === 'notifications' && <NotificationsTab settings={settings} />}
+
+        {/* Save */}
+        {showSaveButtons && (
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => { settings.loadSettings(); }} variant="secondary" size="sm" className="inline-flex items-center whitespace-nowrap">
+              <RefreshCw size={12} className="mr-1.5" />
+              Reset
+            </Button>
+            <Button onClick={handleSave} size="sm" className="inline-flex items-center whitespace-nowrap bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500 shadow-lg shadow-primary-500/20">
+              <Save size={12} className="mr-1.5" />
+              {saved ? 'Saved!' : 'Save Settings'}
+            </Button>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+}
+
+/* ─── PROFILE SECTION (with sub-tabs) ─── */
+function ProfileSection({ user, updateUser, activeSubTab, onSubTabChange }: {
+  user: UserType | null; updateUser: (u: UserType) => void;
+  activeSubTab: ProfileSubTab; onSubTabChange: (tab: ProfileSubTab) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { avatar_url } = await profileApi.uploadAvatar(file);
+      updateUser({ ...user!, avatar_url });
+    } catch (err: any) {
+      console.error('Upload failed:', err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    try {
+      await profileApi.deleteAvatar();
+      updateUser({ ...user!, avatar_url: undefined });
+    } catch (err) {
+      console.error('Remove failed:', err);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Profile Header Card */}
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-6 flex items-center gap-5">
+          <div className="relative group">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500/30 to-cyan-500/30 border-2 border-gray-700/50 flex items-center justify-center overflow-hidden">
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
+              ) : (
+                <User size={32} className="text-primary-400" />
+              )}
+              {uploading && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <RefreshCw size={20} className="text-white animate-spin" />
+                </div>
+              )}
+            </div>
+            <div
+              className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer gap-2"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Camera size={16} className="text-white" />
+              <span className="text-[10px] text-white font-medium">Change</span>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-white font-semibold text-lg">{user?.full_name}</h2>
+            <p className="text-gray-400 text-sm">{user?.email}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant={user?.role === 'principal' ? 'success' : user?.role === 'admin' ? 'info' : 'default'}>
+                {user?.role?.toUpperCase()}
+              </Badge>
+              <span className="text-gray-600 text-xs">|</span>
+              <span className="text-gray-500 text-xs flex items-center gap-1">
+                <Building2 size={11} />
+                {user?.campus?.replace('_', ' ').toUpperCase()}
+              </span>
+              {user?.two_factor_enabled && (
+                <>
+                  <span className="text-gray-600 text-xs">|</span>
+                  <span className="text-green-400 text-[10px] flex items-center gap-1 bg-green-500/10 px-1.5 py-0.5 rounded">
+                    <Shield size={9} /> 2FA
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="text-right text-xs text-gray-600">
+            <p>Member since</p>
+            <p className="text-gray-400">{user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
+            {user?.avatar_url && (
+              <button onClick={handleAvatarRemove} className="text-red-400 hover:text-red-300 mt-2 text-[10px]">
+                Remove photo
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Sub-tabs */}
+        <div className="px-6 pb-3 flex gap-1">
+          {PROFILE_SUB_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => onSubTabChange(tab.key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                activeSubTab === tab.key
+                  ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30'
+                  : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800/50'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Sub-tab Content */}
+      {activeSubTab === 'personal' && <PersonalInfoTab user={user} updateUser={updateUser} />}
+      {activeSubTab === 'security' && <SecurityTab user={user} updateUser={updateUser} />}
+      {activeSubTab === 'activity' && <ActivityTab />}
+    </div>
+  );
+}
+
+/* ─── PERSONAL INFO TAB ─── */
+function PersonalInfoTab({ user, updateUser }: { user: UserType | null; updateUser: (u: UserType) => void }) {
+  const [fullName, setFullName] = useState(user?.full_name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.full_name);
+      setEmail(user.email);
+      setPhone(user.phone || '');
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      const updated = await profileApi.updateProfile({ full_name: fullName, email, phone });
+      updateUser(updated);
+      setSuccess('Profile updated successfully');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const hasChanges = fullName !== user?.full_name || email !== user?.email || phone !== (user?.phone || '');
+
+  return (
+    <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+      <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+        <Edit3 size={16} className="text-primary-400" />
+        <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Personal Information</span>
+      </div>
+      <div className="p-5 space-y-4">
+        {success && (
+          <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm">
+            <CheckCircle2 size={16} />
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+            <AlertCircle size={16} />
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Full Name</label>
+            <div className="relative">
+              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/40 focus:outline-none transition-all"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Email Address</label>
+            <div className="relative">
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/40 focus:outline-none transition-all"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Phone Number</label>
+            <div className="relative">
+              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+63 XXX XXX XXXX"
+                className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm placeholder-gray-600 focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/40 focus:outline-none transition-all"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Campus</label>
+            <div className="flex items-center gap-2 bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-2.5">
+              <Building2 size={14} className="text-gray-500" />
+              <span className="text-gray-300 text-sm">{user?.campus?.replace('_', ' ').toUpperCase()}</span>
+              <span className="ml-auto text-[10px] text-gray-600 bg-gray-800 px-1.5 py-0.5 rounded">READ ONLY</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Role</label>
+            <div className="flex items-center gap-2 bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-2.5">
+              <Shield size={14} className="text-gray-500" />
+              <span className="text-gray-300 text-sm">{user?.role?.toUpperCase()}</span>
+              <span className="ml-auto text-[10px] text-gray-600 bg-gray-800 px-1.5 py-0.5 rounded">READ ONLY</span>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Last Login</label>
+            <div className="flex items-center gap-2 bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-2.5">
+              <LogIn size={14} className="text-gray-500" />
+              <span className="text-gray-300 text-sm">
+                {user?.last_login_at ? new Date(user.last_login_at).toLocaleString() : 'N/A'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {hasChanges && (
+          <div className="flex justify-end pt-2">
+            <Button onClick={handleSave} size="sm" disabled={saving} className="inline-flex items-center whitespace-nowrap bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500">
+              {saving ? <RefreshCw size={12} className="mr-1.5 animate-spin" /> : <Save size={12} className="mr-1.5" />}
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SECURITY TAB ─── */
+function SecurityTab({ user, updateUser }: { user: UserType | null; updateUser: (u: UserType) => void }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+
+  // 2FA states
+  const [twoFALoading, setTwoFALoading] = useState(false);
+  const [qrCode, setQrCode] = useState('');
+  const [secret, setSecret] = useState('');
+  const [twoFACode, setTwoFACode] = useState('');
+  const [twoFAError, setTwoFAError] = useState('');
+  const [twoFASuccess, setTwoFASuccess] = useState('');
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [show2FADisable, setShow2FADisable] = useState(false);
+  const [disablePassword, setDisablePassword] = useState('');
+
+  const handleChangePassword = async () => {
+    setError('');
+    setSuccess('');
+    if (!currentPassword || !newPassword) {
+      setError('Please fill in all fields');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+    setSaving(true);
+    try {
+      await profileApi.changePassword(currentPassword, newPassword);
+      setSuccess('Password changed successfully');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to change password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSetup2FA = async () => {
+    setTwoFALoading(true);
+    setTwoFAError('');
+    try {
+      const data = await profileApi.setup2FA();
+      setQrCode(data.qr_code);
+      setSecret(data.secret);
+      setShow2FASetup(true);
+    } catch (err: any) {
+      setTwoFAError(err.response?.data?.detail || 'Failed to setup 2FA');
+    } finally {
+      setTwoFALoading(false);
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    if (twoFACode.length !== 6) {
+      setTwoFAError('Please enter a 6-digit code');
+      return;
+    }
+    setTwoFALoading(true);
+    setTwoFAError('');
+    try {
+      await profileApi.verify2FA(twoFACode);
+      setTwoFASuccess('2FA enabled successfully');
+      setShow2FASetup(false);
+      setQrCode('');
+      setSecret('');
+      setTwoFACode('');
+      updateUser({ ...user!, two_factor_enabled: true });
+      setTimeout(() => setTwoFASuccess(''), 3000);
+    } catch (err: any) {
+      setTwoFAError(err.response?.data?.detail || 'Invalid code');
+    } finally {
+      setTwoFALoading(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!disablePassword) {
+      setTwoFAError('Please enter your password');
+      return;
+    }
+    setTwoFALoading(true);
+    setTwoFAError('');
+    try {
+      await profileApi.disable2FA(disablePassword);
+      setTwoFASuccess('2FA disabled successfully');
+      setShow2FADisable(false);
+      setDisablePassword('');
+      updateUser({ ...user!, two_factor_enabled: false });
+      setTimeout(() => setTwoFASuccess(''), 3000);
+    } catch (err: any) {
+      setTwoFAError(err.response?.data?.detail || 'Failed to disable 2FA');
+    } finally {
+      setTwoFALoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Change Password */}
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Lock size={16} className="text-amber-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Change Password</span>
+        </div>
+        <div className="p-5 space-y-4">
+          {success && (
+            <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm">
+              <CheckCircle2 size={16} />
+              {success}
+            </div>
+          )}
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+              <AlertCircle size={16} />
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Current Password</label>
+            <div className="relative">
+              <Key size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type={showCurrent ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl pl-9 pr-10 py-2.5 text-white text-sm focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/40 focus:outline-none transition-all"
+              />
+              <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">New Password</label>
+              <div className="relative">
+                <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type={showNew ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl pl-9 pr-10 py-2.5 text-white text-sm focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/40 focus:outline-none transition-all"
+                />
+                <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                  {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+              <div className="relative">
+                <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/40 focus:outline-none transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {newPassword && confirmPassword && newPassword !== confirmPassword && (
+            <p className="text-xs text-red-400">Passwords do not match</p>
+          )}
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={handleChangePassword} size="sm" disabled={saving || !currentPassword || !newPassword} className="inline-flex items-center whitespace-nowrap">
+              {saving ? <RefreshCw size={12} className="mr-1.5 animate-spin" /> : <Lock size={12} className="mr-1.5" />}
+              {saving ? 'Changing...' : 'Change Password'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Two-Factor Authentication */}
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Shield size={16} className="text-green-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Two-Factor Authentication</span>
+          {user?.two_factor_enabled ? (
+            <span className="ml-auto flex items-center gap-1.5 text-[11px] text-green-400 font-medium bg-green-500/10 px-2 py-0.5 rounded-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400" /> ENABLED
+            </span>
+          ) : (
+            <span className="ml-auto text-[11px] text-gray-500 bg-gray-800 px-2 py-0.5 rounded-md">DISABLED</span>
+          )}
+        </div>
+        <div className="p-5 space-y-4">
+          {twoFASuccess && (
+            <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm">
+              <CheckCircle2 size={16} />
+              {twoFASuccess}
+            </div>
+          )}
+          {twoFAError && (
+            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+              <AlertCircle size={16} />
+              {twoFAError}
+            </div>
+          )}
+
+          {!user?.two_factor_enabled && !show2FASetup && (
+            <div className="text-center py-4">
+              <Shield size={40} className="text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm mb-1">Add an extra layer of security to your account</p>
+              <p className="text-gray-600 text-xs mb-4">Use an authenticator app like Google Authenticator or Authy</p>
+              <Button onClick={handleSetup2FA} size="sm" disabled={twoFALoading} className="inline-flex items-center whitespace-nowrap">
+                {twoFALoading ? <RefreshCw size={12} className="mr-1.5 animate-spin" /> : <Shield size={12} className="mr-1.5" />}
+                {twoFALoading ? 'Setting up...' : 'Enable 2FA'}
+              </Button>
+            </div>
+          )}
+
+          {show2FASetup && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-gray-400 text-sm mb-3">Scan this QR code with your authenticator app</p>
+                <div className="inline-block p-3 bg-white rounded-xl">
+                  <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-500 text-xs mb-2">Or enter this code manually:</p>
+                <code className="bg-gray-800 px-3 py-1.5 rounded-lg text-cyan-400 text-sm font-mono select-all">{secret}</code>
+              </div>
+              <div className="max-w-xs mx-auto">
+                <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1.5 text-center">Enter 6-digit code</label>
+                <input
+                  type="text"
+                  value={twoFACode}
+                  onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl px-4 py-3 text-white text-center text-lg font-mono tracking-[0.3em] focus:ring-2 focus:ring-green-500/40 focus:border-green-500/40 focus:outline-none transition-all"
+                  maxLength={6}
+                />
+              </div>
+              <div className="flex justify-center gap-2">
+                <Button variant="secondary" onClick={() => { setShow2FASetup(false); setQrCode(''); setSecret(''); setTwoFACode(''); setTwoFAError(''); }} size="sm" className="inline-flex items-center whitespace-nowrap">
+                  <X size={12} className="mr-1.5" />Cancel
+                </Button>
+                <Button onClick={handleVerify2FA} size="sm" disabled={twoFALoading || twoFACode.length !== 6} className="inline-flex items-center whitespace-nowrap">
+                  {twoFALoading ? <RefreshCw size={12} className="mr-1.5 animate-spin" /> : <CheckCircle2 size={12} className="mr-1.5" />}
+                  {twoFALoading ? 'Verifying...' : 'Verify & Enable'}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {user?.two_factor_enabled && !show2FADisable && (
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <p className="text-gray-300 text-sm font-medium">2FA is active</p>
+                <p className="text-gray-500 text-xs">Your account is protected with two-factor authentication</p>
+              </div>
+              <Button variant="danger" onClick={() => setShow2FADisable(true)} size="sm" className="inline-flex items-center whitespace-nowrap">
+                Disable
+              </Button>
+            </div>
+          )}
+
+          {show2FADisable && (
+            <div className="space-y-3">
+              <p className="text-gray-400 text-sm">Enter your password to disable 2FA:</p>
+              <div className="relative">
+                <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type="password"
+                  value={disablePassword}
+                  onChange={(e) => setDisablePassword(e.target.value)}
+                  placeholder="Your password"
+                  className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-red-500/40 focus:border-red-500/40 focus:outline-none transition-all"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={() => { setShow2FADisable(false); setDisablePassword(''); setTwoFAError(''); }} size="sm" className="inline-flex items-center whitespace-nowrap">
+                  Cancel
+                </Button>
+                <Button variant="danger" onClick={handleDisable2FA} size="sm" disabled={twoFALoading || !disablePassword} className="inline-flex items-center whitespace-nowrap">
+                  {twoFALoading ? <RefreshCw size={12} className="mr-1.5 animate-spin" /> : <Shield size={12} className="mr-1.5" />}
+                  {twoFALoading ? 'Disabling...' : 'Disable 2FA'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Account Security Info */}
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Shield size={16} className="text-cyan-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Security Info</span>
+        </div>
+        <div className="p-5 space-y-3">
+          <div className="flex items-center justify-between py-2">
+            <span className="text-gray-400 text-sm">Password</span>
+            <span className="flex items-center gap-1.5 text-green-400 text-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+              Set
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-t border-gray-800/60">
+            <span className="text-gray-400 text-sm">Two-Factor Auth</span>
+            <span className={`flex items-center gap-1.5 text-sm ${user?.two_factor_enabled ? 'text-green-400' : 'text-gray-500'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${user?.two_factor_enabled ? 'bg-green-400' : 'bg-gray-500'}`} />
+              {user?.two_factor_enabled ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-t border-gray-800/60">
+            <span className="text-gray-400 text-sm">Account Status</span>
+            <span className="flex items-center gap-1.5 text-green-400 text-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+              Active
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ACTIVITY TAB ─── */
+function ActivityTab() {
+  const [activities, setActivities] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadActivity();
+  }, []);
+
+  const loadActivity = async () => {
+    setLoading(true);
+    try {
+      const logs = await profileApi.getActivity(20);
+      setActivities(logs);
+    } catch (err) {
+      console.error('Failed to load activity:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case 'profile_updated': return <Edit3 size={14} className="text-blue-400" />;
+      case 'password_changed': return <Key size={14} className="text-amber-400" />;
+      case 'login': return <LogIn size={14} className="text-green-400" />;
+      default: return <Clock size={14} className="text-gray-400" />;
+    }
+  };
+
+  const getActionLabel = (action: string) => {
+    switch (action) {
+      case 'profile_updated': return 'Profile Updated';
+      case 'password_changed': return 'Password Changed';
+      case 'login': return 'Logged In';
+      default: return action.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+    }
+  };
+
+  return (
+    <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+      <div className="p-4 border-b border-gray-800/60 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <History size={16} className="text-cyan-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Activity Log</span>
+        </div>
+        <button onClick={loadActivity} className="text-gray-500 hover:text-gray-300 transition-colors">
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="p-10 flex flex-col items-center justify-center">
+          <RefreshCw size={24} className="text-gray-600 animate-spin mb-3" />
+          <p className="text-gray-500 text-sm">Loading activity...</p>
+        </div>
+      ) : activities.length === 0 ? (
+        <div className="p-10 flex flex-col items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-gray-800/60 border border-gray-700/40 flex items-center justify-center mb-3">
+            <History size={20} className="text-gray-600" />
+          </div>
+          <p className="text-gray-500 text-sm font-medium">No activity yet</p>
+          <p className="text-gray-600 text-xs mt-1">Your actions will appear here</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-800/60">
+          {activities.map((log) => (
+            <div key={log.id} className="px-5 py-3.5 flex items-center gap-4 hover:bg-gray-800/20 transition-colors">
+              <div className="w-8 h-8 rounded-lg bg-gray-800/80 border border-gray-700/50 flex items-center justify-center flex-shrink-0">
+                {getActionIcon(log.action)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium">{getActionLabel(log.action)}</p>
+                {log.details && (
+                  <p className="text-gray-500 text-xs mt-0.5">
+                    {Object.entries(log.details).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ')}
+                  </p>
+                )}
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-gray-500 text-xs">{log.timestamp ? new Date(log.timestamp).toLocaleDateString() : ''}</p>
+                <p className="text-gray-600 text-[10px]">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : ''}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── VIDEO TAB ─── */
+function VideoTab({ settings }: { settings: SettingsState }) {
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDevice, setSelectedDevice] = useState('');
+  const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    loadDevices();
+    return () => { previewStream?.getTracks().forEach((t) => t.stop()); };
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current && previewStream) videoRef.current.srcObject = previewStream;
+  }, [previewStream]);
+
+  const loadDevices = async () => {
+    setIsRefreshing(true);
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then((s) => s.getTracks().forEach((t) => t.stop()));
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
+      setDevices(videoDevices);
+      if (videoDevices.length > 0 && !selectedDevice) setSelectedDevice(videoDevices[0].deviceId);
+    } catch (err) { console.error('Failed to enumerate devices:', err); }
+    finally { setTimeout(() => setIsRefreshing(false), 600); }
+  };
+
+  const startPreview = async () => {
+    setIsTesting(true);
+    try {
+      previewStream?.getTracks().forEach((t) => t.stop());
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: selectedDevice ? { deviceId: { exact: selectedDevice } } : true, audio: false,
+      });
+      setPreviewStream(stream);
+    } catch (err) { console.error('Preview failed:', err); }
+    finally { setIsTesting(false); }
+  };
+
+  const stopPreview = () => { previewStream?.getTracks().forEach((t) => t.stop()); setPreviewStream(null); };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Monitor size={16} className="text-cyan-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Video Quality</span>
+        </div>
+        <div className="p-5 divide-y divide-gray-800/60">
+          <SettingRow icon={<Monitor size={18} className="text-cyan-400" />} iconBg="bg-cyan-500/10 border border-cyan-500/20" label="HD Video" description="Use high-definition video quality (720p)">
+            <Toggle enabled={settings.hdVideo} onChange={() => settings.setHdVideo(!settings.hdVideo)} />
+          </SettingRow>
+          <SettingRow icon={<Monitor size={18} className="text-blue-400" />} iconBg="bg-blue-500/10 border border-blue-500/20" label="Mirror Video" description="Mirror your local camera preview">
+            <Toggle enabled={settings.mirrorVideo} onChange={() => settings.setMirrorVideo(!settings.mirrorVideo)} />
+          </SettingRow>
+        </div>
+      </div>
+
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Camera size={16} className="text-cyan-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Camera Device</span>
+          {previewStream && (
+            <span className="ml-auto flex items-center gap-1.5 text-[11px] text-green-400 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> ACTIVE
+            </span>
+          )}
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="relative bg-gray-950 rounded-xl overflow-hidden aspect-video border border-gray-800/40">
+            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+            {!previewStream && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-950/80">
+                <div className="w-16 h-16 rounded-2xl bg-gray-800/80 border border-gray-700/50 flex items-center justify-center mb-3">
+                  <Aperture size={28} className="text-gray-600" />
+                </div>
+                <p className="text-gray-500 text-sm font-medium">No preview active</p>
+                <p className="text-gray-600 text-xs mt-1">Click "Test Camera" to start</p>
+              </div>
+            )}
+          </div>
+          <select value={selectedDevice} onChange={(e) => setSelectedDevice(e.target.value)} className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 focus:outline-none transition-all">
+            {devices.map((d) => (<option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${devices.indexOf(d) + 1}`}</option>))}
+            {devices.length === 0 && <option value="">No cameras detected</option>}
+          </select>
+          <div className="flex items-center gap-2">
+            <Button onClick={startPreview} disabled={isTesting} size="sm" className="inline-flex items-center whitespace-nowrap">
+              <Camera size={12} className="mr-1.5" />{isTesting ? 'Starting...' : 'Test Camera'}
+            </Button>
+            <Button variant="secondary" onClick={stopPreview} disabled={!previewStream} size="sm" className="inline-flex items-center whitespace-nowrap">
+              <CameraOff size={12} className="mr-1.5" />Stop
+            </Button>
+            <Button variant="ghost" onClick={loadDevices} size="sm" className="inline-flex items-center whitespace-nowrap">
+              <RefreshCw size={12} className={`mr-1.5 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />Refresh
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── RECORDING TAB ─── */
+interface RecordingEntry { id: string; blob: Blob; url: string; duration: string; size: string; timestamp: Date; }
+
+function RecordingTab() {
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordings, setRecordings] = useState<RecordingEntry[]>([]);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
+        setRecordings((prev) => [{ id: Date.now().toString(), blob, url, duration: `${minutes}:${seconds.toString().padStart(2, '0')}`, size: `${(blob.size / (1024 * 1024)).toFixed(1)} MB`, timestamp: new Date() }, ...prev]);
+        stream.getTracks().forEach((t) => t.stop());
+      };
+      mediaRecorder.start();
+      setIsRecording(true);
+      setElapsedTime(0);
+      timerRef.current = setInterval(() => { setElapsedTime((prev) => prev + 1); }, 1000);
+    } catch (err) { console.error('Failed to start recording:', err); }
+  };
+
+  const stopRecording = () => { mediaRecorderRef.current?.stop(); setIsRecording(false); if (timerRef.current) clearInterval(timerRef.current); };
+  const downloadRecording = (rec: RecordingEntry) => { const a = document.createElement('a'); a.href = rec.url; a.download = `recording-${rec.id}.webm`; a.click(); };
+  const deleteRecording = (id: string) => { const rec = recordings.find((r) => r.id === id); if (rec) URL.revokeObjectURL(rec.url); setRecordings((prev) => prev.filter((r) => r.id !== id)); };
+  const formatTime = (secs: number) => { const m = Math.floor(secs / 60); const s = secs % 60; return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Circle size={16} className={isRecording ? 'text-red-400 fill-red-400' : 'text-gray-500'} />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Recording Control</span>
+        </div>
+        <div className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                {isRecording ? (
+                  <><div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" /><span className="font-orbitron text-3xl font-bold text-red-400 tracking-wider">{formatTime(elapsedTime)}</span></>
+                ) : (
+                  <><Clock size={20} className="text-gray-600" /><span className="font-orbitron text-3xl font-bold text-gray-600 tracking-wider">00:00</span></>
+                )}
+              </div>
+              <div className={`px-3 py-1 rounded-full text-xs font-semibold ${isRecording ? 'bg-red-500/15 text-red-400 border border-red-500/30' : 'bg-gray-800 text-gray-500 border border-gray-700/50'}`}>
+                {isRecording ? 'RECORDING' : 'STANDBY'}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {!isRecording ? (
+                <Button onClick={startRecording} size="sm" className="inline-flex items-center whitespace-nowrap bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500">
+                  <Circle size={12} className="mr-1.5 fill-current" />Start
+                </Button>
+              ) : (
+                <Button onClick={stopRecording} size="sm" className="inline-flex items-center whitespace-nowrap">
+                  <Square size={12} className="mr-1.5" />Stop
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <HardDrive size={16} className="text-gray-500" />
+            <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Recordings</span>
+          </div>
+          <span className="text-xs text-gray-600 bg-gray-800 px-2 py-1 rounded-md">{recordings.length} file(s)</span>
+        </div>
+        {recordings.length === 0 ? (
+          <div className="p-10 flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-gray-800/60 border border-gray-700/40 flex items-center justify-center mb-3">
+              <Film size={20} className="text-gray-600" />
+            </div>
+            <p className="text-gray-500 text-sm font-medium">No recordings yet</p>
+            <p className="text-gray-600 text-xs mt-1">Start a recording to see it here</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-800/60">
+            {recordings.map((rec) => (
+              <div key={rec.id} className="p-4 flex items-center gap-4 hover:bg-gray-800/30 transition-colors group">
+                <div className="relative w-28 h-16 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
+                  <video src={rec.url} className="w-full h-full object-cover" controls={false} />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play size={16} className="text-white" fill="white" />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">{rec.timestamp.toLocaleString()}</p>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <span className="flex items-center gap-1 text-[11px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md"><Clock size={10} /> {rec.duration}</span>
+                    <span className="flex items-center gap-1 text-[11px] text-gray-400 bg-gray-800 px-2 py-0.5 rounded-md"><HardDrive size={10} /> {rec.size}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => downloadRecording(rec)} className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all" title="Download"><Download size={16} /></button>
+                  <button onClick={() => deleteRecording(rec.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all" title="Delete"><Trash2 size={16} /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── AUDIO TAB ─── */
+function AudioTab({ settings }: { settings: SettingsState }) {
+  const [inputDevices, setInputDevices] = useState<MediaDeviceInfo[]>([]);
+  const [outputDevices, setOutputDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedInput, setSelectedInput] = useState('');
+  const [selectedOutput, setSelectedOutput] = useState('');
+  const [isTestingMic, setIsTestingMic] = useState(false);
+  const [micLevel, setMicLevel] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => { loadDevices(); return () => { stopMicTest(); }; }, []);
+
+  const loadDevices = async () => {
+    setIsRefreshing(true);
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((s) => s.getTracks().forEach((t) => t.stop()));
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      setInputDevices(allDevices.filter((d) => d.kind === 'audioinput'));
+      setOutputDevices(allDevices.filter((d) => d.kind === 'audiooutput'));
+    } catch (err) { console.error('Failed to enumerate audio devices:', err); }
+    finally { setTimeout(() => setIsRefreshing(false), 600); }
+  };
+
+  const startMicTest = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: selectedInput ? { deviceId: { exact: selectedInput } } : true });
+      streamRef.current = stream;
+      const audioCtx = new AudioContext();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+      setIsTestingMic(true);
+      const updateLevel = () => {
+        if (!analyserRef.current) return;
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        setMicLevel(Math.min(avg / 128, 1));
+        animFrameRef.current = requestAnimationFrame(updateLevel);
+      };
+      updateLevel();
+    } catch (err) { console.error('Mic test failed:', err); }
+  };
+
+  const stopMicTest = () => {
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    setIsTestingMic(false); setMicLevel(0);
+  };
+
+  const toggleMute = () => {
+    if (streamRef.current) streamRef.current.getAudioTracks().forEach((t) => { t.enabled = isMuted; });
+    setIsMuted(!isMuted);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <AudioLines size={16} className="text-purple-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Audio Quality</span>
+        </div>
+        <div className="p-5 divide-y divide-gray-800/60">
+          <SettingRow icon={<AudioLines size={18} className="text-purple-400" />} iconBg="bg-purple-500/10 border border-purple-500/20" label="HD Audio" description="Use high-quality audio encoding (48kHz)">
+            <Toggle enabled={settings.hdAudio} onChange={() => settings.setHdAudio(!settings.hdAudio)} />
+          </SettingRow>
+          <SettingRow icon={<Volume2 size={18} className="text-pink-400" />} iconBg="bg-pink-500/10 border border-pink-500/20" label="Echo Cancellation" description="Reduce echo during speaker playback">
+            <Toggle enabled={settings.echoCancellation} onChange={() => settings.setEchoCancellation(!settings.echoCancellation)} />
+          </SettingRow>
+          <SettingRow icon={<AudioLines size={18} className="text-emerald-400" />} iconBg="bg-emerald-500/10 border border-emerald-500/20" label="Noise Suppression" description="Filter background noise from microphone">
+            <Toggle enabled={settings.noiseSuppression} onChange={() => settings.setNoiseSuppression(!settings.noiseSuppression)} />
+          </SettingRow>
+          <SettingRow icon={<Volume2 size={18} className="text-amber-400" />} iconBg="bg-amber-500/10 border border-amber-500/20" label="Auto Gain Control" description="Automatically adjust microphone sensitivity">
+            <Toggle enabled={settings.autoGainControl} onChange={() => settings.setAutoGainControl(!settings.autoGainControl)} />
+          </SettingRow>
+        </div>
+      </div>
+
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Mic size={16} className="text-purple-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Microphone</span>
+          {isTestingMic && (
+            <span className="ml-auto flex items-center gap-1.5 text-[11px] text-green-400 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> TESTING
+            </span>
+          )}
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Input Device</label>
+            <select value={selectedInput} onChange={(e) => setSelectedInput(e.target.value)} className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40 focus:outline-none transition-all">
+              {inputDevices.map((d) => (<option key={d.deviceId} value={d.deviceId}>{d.label || 'Microphone'}</option>))}
+              {inputDevices.length === 0 && <option value="">No microphones detected</option>}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Input Level</label>
+            <div className="h-4 bg-gray-800 rounded-full overflow-hidden border border-gray-700/50">
+              <div className="h-full rounded-full transition-all duration-75" style={{
+                width: `${micLevel * 100}%`,
+                background: micLevel > 0.8 ? 'linear-gradient(90deg, #22c55e, #eab308, #ef4444)' : micLevel > 0.5 ? 'linear-gradient(90deg, #22c55e, #eab308)' : 'linear-gradient(90deg, #22c55e, #22d3ee)',
+                boxShadow: micLevel > 0 ? `0 0 10px ${micLevel > 0.8 ? 'rgba(239,68,68,0.4)' : micLevel > 0.5 ? 'rgba(234,179,8,0.4)' : 'rgba(34,197,94,0.4)'}` : 'none',
+              }} />
+            </div>
+            <p className="text-xs text-gray-600 mt-1.5">{isTestingMic ? `Level: ${Math.round(micLevel * 100)}%` : 'Click "Test Microphone" to start'}</p>
+          </div>
+          <div className="flex gap-2">
+            {!isTestingMic ? (
+              <Button onClick={startMicTest} size="sm" className="inline-flex items-center whitespace-nowrap"><Mic size={12} className="mr-1.5" />Test Mic</Button>
+            ) : (
+              <Button variant="danger" onClick={stopMicTest} size="sm" className="inline-flex items-center whitespace-nowrap"><MicOff size={12} className="mr-1.5" />Stop Test</Button>
+            )}
+            <Button variant="secondary" onClick={toggleMute} disabled={!isTestingMic} size="sm" className="inline-flex items-center whitespace-nowrap">
+              {isMuted ? <VolumeX size={12} className="mr-1.5" /> : <Volume2 size={12} className="mr-1.5" />}
+              {isMuted ? 'Unmute' : 'Mute'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+        <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+          <Speaker size={16} className="text-cyan-400" />
+          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Speaker / Output</span>
+        </div>
+        <div className="p-5">
+          <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Output Device</label>
+          <select value={selectedOutput} onChange={(e) => setSelectedOutput(e.target.value)} className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 focus:outline-none transition-all">
+            {outputDevices.map((d) => (<option key={d.deviceId} value={d.deviceId}>{d.label || 'Speaker'}</option>))}
+            {outputDevices.length === 0 && <option value="">No speakers detected</option>}
+          </select>
+        </div>
+      </div>
+
+      <Button variant="ghost" onClick={loadDevices} size="sm" className="inline-flex items-center whitespace-nowrap">
+        <RefreshCw size={12} className={`mr-1.5 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />Refresh Devices
+      </Button>
+    </div>
+  );
+}
+
+/* ─── CONNECTION TAB ─── */
+function ConnectionTab({ settings }: { settings: SettingsState }) {
+  return (
+    <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+      <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+        <Wifi size={16} className="text-green-400" />
+        <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Connection</span>
+      </div>
+      <div className="p-5 divide-y divide-gray-800/60">
+        <SettingRow icon={<Wifi size={18} className="text-green-400" />} iconBg="bg-green-500/10 border border-green-500/20" label="Auto Reconnect" description="Automatically reconnect if connection drops">
+          <Toggle enabled={settings.autoReconnect} onChange={() => settings.setAutoReconnect(!settings.autoReconnect)} />
+        </SettingRow>
+        <SettingRow icon={<Globe size={18} className="text-cyan-400" />} iconBg="bg-cyan-500/10 border border-cyan-500/20" label="Low Latency Mode" description="Prioritize low latency over video quality">
+          <Toggle enabled={settings.lowLatency} onChange={() => settings.setLowLatency(!settings.lowLatency)} />
+        </SettingRow>
+      </div>
+    </div>
+  );
+}
+
+/* ─── NOTIFICATIONS TAB ─── */
+function NotificationsTab({ settings }: { settings: SettingsState }) {
+  return (
+    <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
+      <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
+        <Bell size={16} className="text-amber-400" />
+        <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Notifications</span>
+      </div>
+      <div className="p-5">
+        <SettingRow icon={<Bell size={18} className="text-amber-400" />} iconBg="bg-amber-500/10 border border-amber-500/20" label="Enable Notifications" description="Receive alerts for announcements and emergencies">
+          <Toggle enabled={settings.notifications} onChange={() => settings.setNotifications(!settings.notifications)} />
+        </SettingRow>
+      </div>
+    </div>
+  );
+}

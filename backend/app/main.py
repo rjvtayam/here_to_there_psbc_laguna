@@ -1,0 +1,44 @@
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+import socketio as socketio_lib
+from app.config import settings
+from app.api.v1.router import api_router
+from app.middleware.cors import setup_cors
+from app.middleware.rate_limit import limiter
+from app.signaling.events import sio
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="Here to There API",
+        description="Live Video Portal for Intercampus Communication",
+        version="1.0.0",
+        docs_url="/api/docs",
+        redoc_url="/api/redoc",
+    )
+
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    setup_cors(app)
+    app.include_router(api_router, prefix="/api/v1")
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error. Please try again later."},
+        )
+
+    @app.get("/health")
+    @limiter.exempt
+    def health_check():
+        return {"status": "healthy", "service": "here-to-there"}
+
+    return app
+
+
+fastapi_app = create_app()
+app = socketio_lib.ASGIApp(sio, other_asgi_app=fastapi_app)

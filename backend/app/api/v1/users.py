@@ -1,0 +1,60 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from uuid import UUID
+from pydantic import BaseModel
+from app.database import get_db
+from app.schemas.user import UserResponse
+from app.services.user_service import UserService
+from app.api.deps import get_current_user, require_admin
+
+router = APIRouter()
+
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    campus: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+@router.get("/", response_model=List[UserResponse])
+def list_users(db: Session = Depends(get_db), _=Depends(require_admin)):
+    service = UserService(db)
+    return service.get_all_users()
+
+
+@router.get("/by-campus/{campus}", response_model=List[UserResponse])
+def list_users_by_campus(campus: str, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    service = UserService(db)
+    return service.get_users_by_campus(campus)
+
+
+@router.get("/{user_id}", response_model=UserResponse)
+def get_user(user_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    service = UserService(db)
+    user = service.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+@router.put("/{user_id}", response_model=UserResponse)
+def update_user(user_id: UUID, updates: UserUpdate, db: Session = Depends(get_db), _=Depends(require_admin)):
+    service = UserService(db)
+    try:
+        return service.update_user(user_id, updates.model_dump(exclude_none=True))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{user_id}")
+def deactivate_user(user_id: UUID, db: Session = Depends(get_db), _=Depends(require_admin)):
+    service = UserService(db)
+    try:
+        service.deactivate_user(user_id)
+        return {"message": "User deactivated"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
