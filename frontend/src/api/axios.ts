@@ -7,6 +7,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
@@ -28,9 +29,11 @@ api.interceptors.response.use(
       try {
         const refreshToken = useAuthStore.getState().refreshToken;
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
+          const response = await axios.post(
+            `${API_BASE_URL}/auth/refresh`,
+            { refresh_token: refreshToken },
+            { withCredentials: true }
+          );
 
           const { access_token, refresh_token, user } = response.data;
           useAuthStore.getState().setAuth(access_token, refresh_token, user);
@@ -40,6 +43,7 @@ api.interceptors.response.use(
         }
       } catch {
         useAuthStore.getState().logout();
+        api.post('/auth/logout').catch(() => {});
       }
     }
 

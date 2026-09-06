@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { authApi } from '../api/auth.api';
+import { api } from '../api/axios';
 
 export function useAuth() {
-  const { user, token, setAuth, logout } = useAuthStore();
+  const { user, token, setAuth, logout: storeLogout } = useAuthStore();
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await authApi.login(email, password);
@@ -35,6 +36,15 @@ export function useAuth() {
     setAuth(response.access_token, response.refresh_token, response.user);
     return response.user;
   }, [setAuth]);
+
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // Ignore errors on logout
+    }
+    storeLogout();
+  }, [storeLogout]);
 
   return {
     user,
