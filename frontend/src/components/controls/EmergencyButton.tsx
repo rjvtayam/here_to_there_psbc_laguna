@@ -1,6 +1,7 @@
 import { AlertTriangle, X } from 'lucide-react';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useSocket } from '../../hooks/useSocket';
 
 interface EmergencyButtonProps {
   onClick: () => void;
@@ -27,11 +28,13 @@ export function EmergencyButton({ onClick, disabled }: EmergencyButtonProps) {
 }
 
 export function EmergencyAlert() {
-  const { emergencyMessage, emergencyTriggeredBy, setEmergency } = useSessionStore();
+  const { emergencyMessage, emergencyTriggeredBy, emergencyTriggeredByRole, emergencyCampus, emergencyCampusOnly, setEmergency } = useSessionStore();
   const { user } = useAuthStore();
-  const isAdmin = user?.role === 'admin';
+  const { emit } = useSocket();
+  const canDismiss = user?.role === 'admin' || user?.role === 'principal';
 
   const handleDismiss = () => {
+    emit('emergency_dismiss');
     setEmergency(false);
   };
 
@@ -40,13 +43,32 @@ export function EmergencyAlert() {
       <div className="text-center max-w-2xl px-6">
         <AlertTriangle size={96} className="mx-auto text-white mb-6 animate-pulse" />
         <h1 className="font-orbitron text-5xl font-bold text-white mb-4 animate-pulse">EMERGENCY BROADCAST</h1>
+        {emergencyCampusOnly && emergencyCampus && (
+          <p className="text-sm text-red-300 mb-3 font-semibold bg-white/10 border border-white/20 px-3 py-1.5 rounded-full inline-block">
+            {emergencyCampus} Campus Only
+          </p>
+        )}
         {emergencyTriggeredBy && (
-          <p className="text-lg text-red-200 mb-2">Triggered by: <span className="font-bold text-white">{emergencyTriggeredBy}</span></p>
+          <div className="mb-4">
+            <p className="text-lg text-red-200 mb-1">Triggered by: <span className="font-bold text-white">{emergencyTriggeredBy}</span></p>
+            <div className="flex items-center justify-center gap-2">
+              {emergencyTriggeredByRole && (
+                <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
+                  {emergencyTriggeredByRole}
+                </span>
+              )}
+              {emergencyCampus && (
+                <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
+                  {emergencyCampus}
+                </span>
+              )}
+            </div>
+          </div>
         )}
         <p className="text-2xl text-red-100 mb-8">
           {emergencyMessage || "Please pay attention to the principal's announcement"}
         </p>
-        {isAdmin && (
+        {canDismiss && (
           <button
             onClick={handleDismiss}
             className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200 backdrop-blur-sm border border-white/30"

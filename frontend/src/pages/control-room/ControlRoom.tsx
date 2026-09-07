@@ -13,7 +13,7 @@ import { usePeerStore } from '../../stores/peerStore';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useAuthStore } from '../../stores/authStore';
 import { ROOMS } from '../../lib/constants';
-import { Users, Wifi, MessageSquare, MonitorUp } from 'lucide-react';
+import { Users, Wifi, MessageSquare, MonitorUp, AlertTriangle } from 'lucide-react';
 import { PortalToggle } from '../../components/controls/PortalToggle';
 import { PortalStatusIndicator } from '../../components/indicators/PortalStatusIndicator';
 import { MicTalkingIndicator } from '../../components/indicators/MicTalkingIndicator';
@@ -25,7 +25,7 @@ export function ControlRoom() {
   const { startLocalStream, toggleVideo, shareScreen } = useWebRTC(roomId);
   const { emit } = useSocket();
   const { localStream, isVideoOff, isScreenSharing, localMicActive } = usePeerStore();
-  const { roomUsers, isEmergency, remotePortalModes, remoteMeetingModes, screenSharerSid, portalMode, meetingMode } = useSessionStore();
+  const { roomUsers, isEmergency, emergencyTriggeredBy, remotePortalModes, remoteMeetingModes, screenSharerSid, portalMode, meetingMode } = useSessionStore();
   const { user } = useAuthStore();
   const [activeTalkTarget, setActiveTalkTarget] = useState<'paete' | 'pagsanjan' | 'both' | null>(null);
   const [showEmergencyConfirm, setShowEmergencyConfirm] = useState(false);
@@ -152,10 +152,22 @@ export function ControlRoom() {
               </button>
 
               {showOnlinePanel && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-                  <div className="px-3 py-2 border-b border-gray-700">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
                     <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Online Users ({roomUsers.length})</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] text-green-400 font-medium">LIVE</span>
+                    </div>
                   </div>
+                  {isEmergency && (
+                    <div className="px-3 py-2 bg-red-500/15 border-b border-red-500/30 flex items-center gap-2">
+                      <AlertTriangle size={12} className="text-red-400 flex-shrink-0" />
+                      <span className="text-[11px] text-red-300 font-medium">
+                        Emergency Active — {emergencyTriggeredBy}
+                      </span>
+                    </div>
+                  )}
                   <div className="max-h-64 overflow-y-auto">
                     {roomUsers.map((u) => {
                       const isMe = u.sid === mySid;
@@ -331,14 +343,15 @@ export function ControlRoom() {
 
       <ConfirmModal
         isOpen={showEmergencyConfirm}
-        title="Trigger Emergency Broadcast?"
+        title="Emergency Broadcast?"
         message="This will immediately override all campus screens with an emergency alert. This action cannot be undone."
-        confirmLabel="Trigger Emergency"
+        confirmLabel="Emergency"
         cancelLabel="Cancel"
         variant="danger"
         icon="radio"
         onConfirm={() => {
-          emit('emergency_trigger', { message: 'Emergency from Control Room' });
+          const mode = portalMode ? (meetingMode ? 'meeting' : 'portal') : 'live';
+          emit('emergency_trigger', { message: 'Emergency from Control Room', mode });
           setShowEmergencyConfirm(false);
         }}
         onCancel={() => setShowEmergencyConfirm(false)}

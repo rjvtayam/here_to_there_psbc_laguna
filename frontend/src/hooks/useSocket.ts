@@ -100,7 +100,12 @@ function initSocket(token: string, setRoomUsers: any, setEmergency: any) {
 
   socket.on('emergency_alert', (data) => {
     console.log('[Socket] emergency_alert:', data);
-    setEmergency(true, data.message, data.triggered_by);
+    setEmergency(true, data.message, data.triggered_by, data.triggered_by_role, data.campus_label, data.campus_only);
+  });
+
+  socket.on('emergency_dismissed', () => {
+    console.log('[Socket] emergency_dismissed');
+    setEmergency(false);
   });
 
   socket.on('disconnect', (reason) => {

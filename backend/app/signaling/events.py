@@ -7,6 +7,7 @@ from app.config import settings
 
 MAX_CHAT_MESSAGE_LENGTH = settings.MAX_CHAT_MESSAGE_LENGTH
 ALLOWED_ROLES = {"principal", "admin", "teacher", "staff"}
+MAIN_ROOM = "main-session"
 
 sio = socketio.AsyncServer(
     async_mode="asgi",
@@ -287,7 +288,7 @@ async def emergency_trigger(sid, data):
         session = await sio.get_session(sid)
     except (KeyError, Exception):
         return
-    if session.get("role") != "principal":
+    if session.get("role") not in ["principal", "admin"]:
         await sio.emit("error", {"message": "Unauthorized"}, room=sid)
         return
 
@@ -295,16 +296,45 @@ async def emergency_trigger(sid, data):
     if len(emergency_msg) > 500:
         emergency_msg = emergency_msg[:500]
 
-    await sio.emit("emergency_alert", {
-        "triggered_by": session.get("full_name"),
-        "campus": session.get("campus"),
-        "message": emergency_msg,
-    }, broadcast=True)
+    role = session.get("role")
+    campus = session.get("campus")
+    full_name = session.get("full_name")
+    role_label = role.capitalize()
+    campus_label = campus.replace("_", " ").title() if campus else "Unknown"
 
-    await broadcast_service.log_emergency(
-        type("User", (), {"id": session.get("user_id")})(),
-        {"message": emergency_msg},
-    )
+    mode = data.get("mode", "live")
+    is_campus_only = mode in ("portal", "meeting")
+
+    alert_payload = {
+        "triggered_by": full_name,
+        "triggered_by_role": role_label,
+        "campus": campus,
+        "campus_label": campus_label,
+        "message": emergency_msg,
+        "campus_only": is_campus_only,
+    }
+
+    if is_campus_only and campus:
+        members = room_members.get(MAIN_ROOM, set())
+        for member_sid in list(members):
+            try:
+                member_session = await sio.get_session(member_sid)
+                if member_session and member_session.get("campus") == campus:
+                    await sio.emit("emergency_alert", alert_payload, room=member_sid)
+            except (KeyError, Exception):
+                pass
+        print(f"[Backend] Emergency (campus={campus}): {full_name}: {emergency_msg[:50]}")
+    else:
+        await sio.emit("emergency_alert", alert_payload, broadcast=True)
+        print(f"[Backend] Emergency (ALL): {full_name}: {emergency_msg[:50]}")
+
+    try:
+        await broadcast_service.log_emergency(
+            type("User", (), {"id": session.get("user_id")})(),
+            {"message": emergency_msg},
+        )
+    except Exception as e:
+        print(f"[Backend] log_emergency error: {e}")
 
     try:
         db = SessionLocal()
@@ -317,6 +347,34 @@ async def emergency_trigger(sid, data):
         db.close()
     except Exception:
         pass
+
+
+@sio.event
+async def emergency_dismiss(sid, data):
+    try:
+        session = await sio.get_session(sid)
+    except (KeyError, Exception):
+        return
+    if session.get("role") not in ["principal", "admin"]:
+        await sio.emit("error", {"message": "Unauthorized"}, room=sid)
+        return
+
+    dismissor_campus = session.get("campus")
+    dismissor_role = session.get("role")
+
+    if dismissor_role == "admin":
+        await sio.emit("emergency_dismissed", broadcast=True)
+        print(f"[Backend] Emergency dismissed by admin {session.get('full_name')}")
+    else:
+        members = room_members.get(MAIN_ROOM, set())
+        for member_sid in list(members):
+            try:
+                member_session = await sio.get_session(member_sid)
+                if member_session and member_session.get("campus") == dismissor_campus:
+                    await sio.emit("emergency_dismissed", room=member_sid)
+            except (KeyError, Exception):
+                pass
+        print(f"[Backend] Emergency dismissed by {dismissor_role} {session.get('full_name')} (campus={dismissor_campus})")
 
 
 @sio.event

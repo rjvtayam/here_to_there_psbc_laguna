@@ -7,6 +7,9 @@ interface SessionState {
   isEmergency: boolean;
   emergencyMessage: string | null;
   emergencyTriggeredBy: string | null;
+  emergencyTriggeredByRole: string | null;
+  emergencyCampus: string | null;
+  emergencyCampusOnly: boolean;
   portalMode: boolean;
   meetingMode: boolean;
   remotePortalModes: Record<string, boolean>;
@@ -17,7 +20,7 @@ interface SessionState {
   addRoomUser: (user: RoomUser) => void;
   removeRoomUser: (sid: string) => void;
   updateUserStream: (sid: string, stream: MediaStream) => void;
-  setEmergency: (active: boolean, message?: string, triggeredBy?: string) => void;
+  setEmergency: (active: boolean, message?: string, triggeredBy?: string, triggeredByRole?: string, campus?: string, campusOnly?: boolean) => void;
   togglePortalMode: () => void;
   setPortalMode: (active: boolean) => void;
   setMeetingMode: (active: boolean) => void;
@@ -32,6 +35,9 @@ export const useSessionStore = create<SessionState>((set) => ({
   isEmergency: false,
   emergencyMessage: null,
   emergencyTriggeredBy: null,
+  emergencyTriggeredByRole: null,
+  emergencyCampus: null,
+  emergencyCampusOnly: false,
   portalMode: true,
   meetingMode: false,
   remotePortalModes: {},
@@ -59,8 +65,8 @@ export const useSessionStore = create<SessionState>((set) => ({
       ),
     })),
 
-  setEmergency: (active, message, triggeredBy) =>
-    set({ isEmergency: active, emergencyMessage: message || null, emergencyTriggeredBy: triggeredBy || null }),
+  setEmergency: (active, message, triggeredBy, triggeredByRole, campus, campusOnly) =>
+    set({ isEmergency: active, emergencyMessage: message || null, emergencyTriggeredBy: triggeredBy || null, emergencyTriggeredByRole: triggeredByRole || null, emergencyCampus: campus || null, emergencyCampusOnly: campusOnly ?? false }),
 
   togglePortalMode: () =>
     set((state) => ({ portalMode: !state.portalMode })),

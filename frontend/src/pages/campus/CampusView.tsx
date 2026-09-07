@@ -15,7 +15,7 @@ import { usePeerStore } from '../../stores/peerStore';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useAuthStore } from '../../stores/authStore';
 import { ROOMS } from '../../lib/constants';
-import { Users, Wifi, Radio, MessageSquare, MonitorUp } from 'lucide-react';
+import { Users, Wifi, Radio, MessageSquare, MonitorUp, AlertTriangle } from 'lucide-react';
 import { PortalStatusIndicator } from '../../components/indicators/PortalStatusIndicator';
 import { MicTalkingIndicator } from '../../components/indicators/MicTalkingIndicator';
 import { WelcomeToast } from '../../components/demo/WelcomeToast';
@@ -27,7 +27,7 @@ export function CampusView() {
   const { startLocalStream, toggleVideo, shareScreen } = useWebRTC(roomId);
   const { emit } = useSocket();
   const { localStream, isVideoOff, localMicActive } = usePeerStore();
-  const { roomUsers, isEmergency, emergencyMessage, emergencyTriggeredBy, remotePortalModes, remoteMeetingModes, screenSharerSid, portalMode, meetingMode } = useSessionStore();
+  const { roomUsers, isEmergency, emergencyMessage, emergencyTriggeredBy, emergencyTriggeredByRole, emergencyCampus, emergencyCampusOnly, remotePortalModes, remoteMeetingModes, screenSharerSid, portalMode, meetingMode } = useSessionStore();
   const { user } = useAuthStore();
   const [showChat, setShowChat] = useState(false);
   const [activeTalkTarget, setActiveTalkTarget] = useState<'paete' | 'pagsanjan' | 'both' | null>(null);
@@ -76,11 +76,30 @@ export function CampusView() {
   if (isEmergency) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center z-50">
-        <div className="text-center animate-pulse">
+        <div className="text-center animate-pulse max-w-2xl px-6">
           <Radio size={64} className="text-white mx-auto mb-4" />
           <h1 className="font-orbitron text-4xl font-bold text-white mb-2">EMERGENCY BROADCAST</h1>
+          {emergencyCampusOnly && emergencyCampus && (
+            <p className="text-sm text-red-300 mb-3 font-semibold bg-white/10 border border-white/20 px-3 py-1.5 rounded-full inline-block">
+              {emergencyCampus} Campus Only
+            </p>
+          )}
           {emergencyTriggeredBy && (
-            <p className="text-lg text-red-200 mb-2">Triggered by: <span className="font-bold text-white">{emergencyTriggeredBy}</span></p>
+            <div className="mb-3">
+              <p className="text-lg text-red-200 mb-1">Triggered by: <span className="font-bold text-white">{emergencyTriggeredBy}</span></p>
+              <div className="flex items-center justify-center gap-2">
+                {emergencyTriggeredByRole && (
+                  <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
+                    {emergencyTriggeredByRole}
+                  </span>
+                )}
+                {emergencyCampus && (
+                  <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
+                    {emergencyCampus}
+                  </span>
+                )}
+              </div>
+            </div>
           )}
           <p className="text-xl text-red-100">{emergencyMessage || 'Please pay attention to the principal\'s announcement'}</p>
         </div>
@@ -138,10 +157,22 @@ export function CampusView() {
               </button>
 
               {showOnlinePanel && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
-                  <div className="px-3 py-2 border-b border-gray-700">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
                     <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Online Users ({roomUsers.length})</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] text-green-400 font-medium">LIVE</span>
+                    </div>
                   </div>
+                  {isEmergency && (
+                    <div className="px-3 py-2 bg-red-500/15 border-b border-red-500/30 flex items-center gap-2">
+                      <AlertTriangle size={12} className="text-red-400 flex-shrink-0" />
+                      <span className="text-[11px] text-red-300 font-medium">
+                        Emergency Active — {emergencyTriggeredBy}
+                      </span>
+                    </div>
+                  )}
                   <div className="max-h-64 overflow-y-auto">
                     {roomUsers.map((u) => {
                       const isMe = u.sid === mySid;
@@ -305,15 +336,16 @@ export function CampusView() {
 
       <ConfirmModal
         isOpen={showEmergencyConfirm}
-        title="Trigger Emergency Broadcast?"
+        title="Emergency Broadcast?"
         message="This will immediately override all campus screens with an emergency alert. This action cannot be undone."
-        confirmLabel="Trigger Emergency"
+        confirmLabel="Emergency"
         cancelLabel="Cancel"
         variant="danger"
         icon="radio"
         onConfirm={() => {
-          const roleLabel = user?.role === 'principal' ? 'Principal' : user?.role === 'teacher' ? 'Teacher' : 'Staff';
-          emit('emergency_trigger', { message: `Emergency from ${roleLabel}` });
+          const campusLabel = campusName?.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Campus';
+          const mode = portalMode ? (meetingMode ? 'meeting' : 'portal') : 'live';
+          emit('emergency_trigger', { message: `Emergency from ${campusLabel}`, mode });
           setShowEmergencyConfirm(false);
         }}
         onCancel={() => setShowEmergencyConfirm(false)}
