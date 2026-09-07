@@ -12,6 +12,7 @@ export function EmergencyButton({ onClick, disabled }: EmergencyButtonProps) {
     <button
       onClick={onClick}
       disabled={disabled}
+      data-demo="btn-emergency"
       className={`flex items-center gap-1.5 font-bold py-1.5 px-3 rounded-lg text-xs transition-colors duration-200 ${
         disabled
           ? 'bg-gray-800 text-gray-600 border border-gray-700/30 cursor-not-allowed opacity-50'

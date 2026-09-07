@@ -17,6 +17,8 @@ import { Users, Wifi, MessageSquare, MonitorUp } from 'lucide-react';
 import { PortalToggle } from '../../components/controls/PortalToggle';
 import { PortalStatusIndicator } from '../../components/indicators/PortalStatusIndicator';
 import { MicTalkingIndicator } from '../../components/indicators/MicTalkingIndicator';
+import { WelcomeToast } from '../../components/demo/WelcomeToast';
+import { LiveDemo } from '../../components/demo/LiveDemo';
 
 export function ControlRoom() {
   const roomId = ROOMS.MAIN;
@@ -30,11 +32,24 @@ export function ControlRoom() {
   const [showChat, setShowChat] = useState(false);
   const [showOnlinePanel, setShowOnlinePanel] = useState(false);
   const onlinePanelRef = useRef<HTMLDivElement>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showLiveDemo, setShowLiveDemo] = useState(false);
+  const [demoData, setDemoData] = useState<{ userId: string; name: string; campus: string; role: string } | null>(null);
 
   const myCampus = user?.campus;
   const mySid = useSocket().socket?.id;
   const isAdmin = user?.role === 'admin';
   const { setTalkTarget, setLocalMicActive } = usePeerStore();
+
+  useEffect(() => {
+    const pending = localStorage.getItem('pending_live_demo');
+    if (pending) {
+      const data = JSON.parse(pending);
+      setDemoData(data);
+      setShowWelcome(true);
+      localStorage.removeItem('pending_live_demo');
+    }
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -115,12 +130,12 @@ export function ControlRoom() {
               <Wifi size={14} /> SYSTEM ONLINE
             </span>
             {isAdmin && (
-              <span className="text-[10px] text-primary-400 bg-primary-500/10 border border-primary-500/20 px-2 py-1 rounded-md font-semibold">
+              <span className="text-[10px] text-primary-400 bg-primary-500/10 border border-primary-500/20 px-2 py-1 rounded-md font-semibold" data-demo="campus-badge">
                 ADMIN VIEW
               </span>
             )}
             {myCampus && myCampus !== 'control_room' && (
-              <span className="text-[10px] text-gray-500 bg-gray-800 px-2 py-1 rounded-md border border-gray-700/50">
+              <span className="text-[10px] text-gray-500 bg-gray-800 px-2 py-1 rounded-md border border-gray-700/50" data-demo="campus-badge">
                 Viewing as: <span className="text-primary-400 font-semibold">{myCampus.toUpperCase()}</span> Principal
               </span>
             )}
@@ -131,6 +146,7 @@ export function ControlRoom() {
               <button
                 onClick={() => setShowOnlinePanel(!showOnlinePanel)}
                 className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-700"
+                data-demo="online-count"
               >
                 <Users size={14} /> {roomUsers.length} online
               </button>
@@ -174,15 +190,16 @@ export function ControlRoom() {
             <button
               onClick={() => setShowChat(true)}
               className="relative p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+              data-demo="btn-chat"
             >
               <MessageSquare size={18} />
             </button>
-            <BulletinBoard />
+            <div data-demo="btn-bell"><BulletinBoard /></div>
           </div>
         </header>
 
         {/* Video Grid */}
-        <div className="flex-1 mb-4">
+        <div className="flex-1 mb-4" data-demo="remote-area">
           {screenSharerSid ? (
             /* Screen Sharing Mode - Google Meet style */
             <div className="h-full flex flex-col gap-3">
@@ -259,7 +276,7 @@ export function ControlRoom() {
         {/* Your Feed + Controls */}
         <div className="flex items-center gap-4">
           {/* Local Feed */}
-          <div className="w-48 flex-shrink-0">
+          <div className="w-48 flex-shrink-0" data-demo="local-video">
             <VideoCard
               stream={localStream}
               name={user?.full_name || 'You'}
@@ -275,7 +292,7 @@ export function ControlRoom() {
             <div className="flex items-center gap-2">
               {myCampus && myCampus !== 'control_room' && (
                 <>
-                  <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700/50">
+                  <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700/50" data-demo="campus-badge">
                     Campus: <span className="text-white font-semibold">{myCampus.toUpperCase()}</span>
                   </span>
                   <TalkButton
@@ -295,7 +312,7 @@ export function ControlRoom() {
               ) : null}
             </div>
             <div className="flex items-center gap-2">
-              <PortalToggle />
+              <div data-demo="portal-toggle"><PortalToggle /></div>
               <VideoControls
                 isAudioMuted={!localMicActive}
                 isVideoOff={isVideoOff}
@@ -328,6 +345,29 @@ export function ControlRoom() {
       />
 
       <ChatPanel isOpen={showChat} onClose={() => setShowChat(false)} />
+
+      {showWelcome && demoData && (
+        <WelcomeToast
+          name={demoData.name}
+          campus={demoData.campus}
+          role={demoData.role}
+          onComplete={() => {
+            setShowWelcome(false);
+            setShowLiveDemo(true);
+          }}
+        />
+      )}
+
+      {showLiveDemo && demoData && (
+        <LiveDemo
+          isOpen={showLiveDemo}
+          onClose={() => {
+            setShowLiveDemo(false);
+            localStorage.setItem(`demo_completed_${demoData.userId}`, 'true');
+          }}
+          userRole={demoData.role}
+        />
+      )}
     </DashboardLayout>
   );
 }

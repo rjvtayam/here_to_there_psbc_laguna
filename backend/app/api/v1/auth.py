@@ -7,12 +7,24 @@ from app.database import get_db
 from app.schemas.user import UserCreate, UserLogin, Token, UserResponse
 from app.schemas.auth import TokenRefresh, TwoFactorLoginRequest
 from app.services.auth_service import AuthService
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_current_user_optional
 from app.config import settings
 from app.middleware.rate_limit import limiter
 from app.utils.security import decode_token, create_access_token, create_refresh_token
 
 router = APIRouter()
+
+ROLES_ALLOWING_PRINCIPAL = ["principal", "teacher"]
+ROLES_ALLOWING_STAFF = ["staff"]
+
+def _get_allowed_roles(user):
+    if not user:
+        return ["principal", "teacher", "staff"]
+    if user.role == "admin":
+        return ROLES_ALLOWING_PRINCIPAL
+    if user.role == "principal":
+        return ROLES_ALLOWING_STAFF
+    return []
 
 PASSWORD_MIN_LENGTH = 8
 PASSWORD_PATTERN = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$")
@@ -64,7 +76,16 @@ def _clear_auth_cookies(response: Response):
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
-def register(request: Request, response: Response, user_data: UserCreate, db: Session = Depends(get_db)):
+def register(request: Request, response: Response, user_data: UserCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user_optional)):
+    allowed_roles = _get_allowed_roles(current_user)
+    if user_data.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail=f"You are not allowed to create {user_data.role} accounts")
+
+    if current_user and current_user.role == "principal":
+        principal_campus = current_user.campus
+        if user_data.campus != principal_campus:
+            raise HTTPException(status_code=403, detail="You can only create users for your campus")
+
     validate_password_strength(user_data.password)
     auth_service = AuthService(db)
     try:

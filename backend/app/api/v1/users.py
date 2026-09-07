@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.schemas.user import UserResponse
 from app.services.user_service import UserService
-from app.api.deps import get_current_user, require_admin
+from app.api.deps import get_current_user, require_admin, require_principal
 
 router = APIRouter()
 
@@ -21,9 +21,11 @@ class UserUpdate(BaseModel):
 
 
 @router.get("/", response_model=List[UserResponse])
-def list_users(db: Session = Depends(get_db), _=Depends(require_admin)):
+def list_users(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     service = UserService(db)
-    return service.get_all_users()
+    if current_user.role == "admin":
+        return service.get_all_users()
+    return service.get_users_by_campus(current_user.campus)
 
 
 @router.get("/by-campus/{campus}", response_model=List[UserResponse])
@@ -42,7 +44,9 @@ def get_user(user_id: UUID, db: Session = Depends(get_db), _=Depends(get_current
 
 
 @router.put("/{user_id}", response_model=UserResponse)
-def update_user(user_id: UUID, updates: UserUpdate, db: Session = Depends(get_db), _=Depends(require_admin)):
+def update_user(user_id: UUID, updates: UserUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    if current_user.role not in ("admin", "principal"):
+        raise HTTPException(status_code=403, detail="Not authorized")
     service = UserService(db)
     try:
         return service.update_user(user_id, updates.model_dump(exclude_none=True))
@@ -51,7 +55,9 @@ def update_user(user_id: UUID, updates: UserUpdate, db: Session = Depends(get_db
 
 
 @router.delete("/{user_id}")
-def deactivate_user(user_id: UUID, db: Session = Depends(get_db), _=Depends(require_admin)):
+def deactivate_user(user_id: UUID, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    if current_user.role not in ("admin", "principal"):
+        raise HTTPException(status_code=403, detail="Not authorized")
     service = UserService(db)
     try:
         service.deactivate_user(user_id)

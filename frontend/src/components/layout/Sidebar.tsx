@@ -6,7 +6,7 @@ import { Home, Settings, Users, LogOut, ChevronsLeft, ChevronsRight } from 'luci
 export function Sidebar() {
   const { user, logout } = useAuthStore();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
-  const isControlRoom = user?.campus === 'control_room' || user?.role === 'principal';
+  const showUsers = user?.role === 'admin' || user?.role === 'principal';
 
   return (
     <aside
@@ -39,17 +39,24 @@ export function Sidebar() {
       {/* Nav items */}
       <nav className="flex-1 flex flex-col gap-0.5 py-3">
         <SidebarLink
-          to={isControlRoom ? '/control-room' : `/campus/${user?.campus}`}
+          to={showUsers ? '/control-room' : `/campus/${user?.campus}`}
           icon={<Home size={18} />}
           label="Home"
           isOpen={isSidebarOpen}
         />
 
-        {isControlRoom && (
+        {showUsers && (
           <>
             <SidebarLink to="/admin/users" icon={<Users size={18} />} label="Users" isOpen={isSidebarOpen} />
-            <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={isSidebarOpen} />
           </>
+        )}
+
+        {user?.role === 'admin' && (
+          <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={isSidebarOpen} />
+        )}
+
+        {(user?.role === 'teacher' || user?.role === 'staff' || user?.role === 'principal') && (
+          <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={isSidebarOpen} />
         )}
       </nav>
 

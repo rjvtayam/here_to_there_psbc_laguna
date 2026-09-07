@@ -4,14 +4,16 @@ import {
   Video, Monitor, Shield, Wifi, Play, Mic,
   ScreenShare, Bell, Globe, Zap, Sparkles, ArrowRight, Clock, Radio, Signal
 } from 'lucide-react';
+import { DemoTour } from '../components/demo/DemoTour';
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white overflow-hidden">
       <Navbar onLogin={() => navigate('/login')} />
-      <HeroSection onGetStarted={() => navigate('/login')} />
+      <HeroSection onGetStarted={() => navigate('/login')} onWatchDemo={() => setDemoOpen(true)} />
       <StatsSection />
       <FeaturesSection />
       <HowItWorksSection />
@@ -20,6 +22,7 @@ export function LandingPage() {
       <MapSection />
       <CTASection onGetStarted={() => navigate('/login')} />
       <Footer />
+      <DemoTour isOpen={demoOpen} onClose={() => setDemoOpen(false)} />
     </div>
   );
 }
@@ -60,7 +63,7 @@ function Navbar({ onLogin }: { onLogin: () => void }) {
 }
 
 /* ─── HERO ─── */
-function HeroSection({ onGetStarted }: { onGetStarted: () => void }) {
+function HeroSection({ onGetStarted, onWatchDemo }: { onGetStarted: () => void; onWatchDemo: () => void }) {
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-16">
       {/* Background effects */}
@@ -137,7 +140,7 @@ function HeroSection({ onGetStarted }: { onGetStarted: () => void }) {
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </span>
           </button>
-          <button className="flex items-center gap-2 text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-6 py-3.5 rounded-xl transition-all duration-300">
+          <button onClick={onWatchDemo} className="flex items-center gap-2 text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-6 py-3.5 rounded-xl transition-all duration-300">
             <Play size={16} className="text-primary-400" />
             Watch Demo
           </button>

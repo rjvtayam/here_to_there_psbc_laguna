@@ -49,6 +49,32 @@ async def require_admin(current_user=Depends(get_current_user)):
     return current_user
 
 
+async def get_current_user_optional(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+):
+    token = None
+
+    if credentials:
+        token = credentials.credentials
+
+    if not token:
+        token = request.cookies.get("access_token")
+
+    if not token:
+        return None
+
+    payload = decode_token(token)
+
+    if not payload or payload.get("type") != "access":
+        return None
+
+    auth_service = AuthService(db)
+    user = auth_service.get_current_user(payload["sub"])
+    return user
+
+
 async def require_principal(current_user=Depends(get_current_user)):
     if current_user.role != "principal":
         raise HTTPException(

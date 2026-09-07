@@ -40,6 +40,11 @@ export function Login() {
         return;
       }
 
+      const demoKey = `demo_completed_${user?.id}`;
+      if (!localStorage.getItem(demoKey)) {
+        localStorage.setItem('pending_live_demo', JSON.stringify({ userId: user?.id, name: user?.full_name, campus: user?.campus, role: user?.role }));
+      }
+
       if (user?.role === 'principal' || user?.role === 'admin') {
         navigate('/control-room');
       } else {
@@ -67,6 +72,11 @@ export function Login() {
         setError(`This account is registered to ${user.campus === 'control_room' ? 'Control Room' : user.campus === 'paete' ? 'PSBC Paete' : 'PSBC Pagsanjan'}. Please select the correct campus.`);
         setIsLoading(false);
         return;
+      }
+
+      const demoKey = `demo_completed_${user.id}`;
+      if (!localStorage.getItem(demoKey)) {
+        localStorage.setItem('pending_live_demo', JSON.stringify({ userId: user.id, name: user.full_name, campus: user.campus, role: user.role }));
       }
 
       if (user.role === 'principal' || user.role === 'admin') {

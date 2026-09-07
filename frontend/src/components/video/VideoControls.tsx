@@ -40,6 +40,7 @@ export function VideoControls({
 
       <button
         onClick={onToggleVideo}
+        data-demo="btn-video"
         className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
           isVideoOff
             ? 'bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30'
@@ -53,6 +54,7 @@ export function VideoControls({
       <button
         onClick={onToggleScreenShare}
         disabled={screenShareDisabled}
+        data-demo="btn-screen"
         className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
           screenShareDisabled
             ? 'bg-gray-800 text-gray-600 border border-gray-700/30 cursor-not-allowed opacity-50'
