@@ -411,11 +411,11 @@ export function LiveDemo({ isOpen, onClose, userRole }: LiveDemoProps) {
           isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
         } ${getPanelPosition().className}`}
       >
-        <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/60 shadow-2xl shadow-black/50 overflow-hidden min-w-[480px] max-w-[560px]">
+        <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/60 shadow-2xl shadow-black/50 overflow-hidden w-[calc(100vw-2rem)] sm:min-w-[480px] sm:max-w-[560px]">
           {/* Top accent line */}
           <div className="h-0.5 bg-gradient-to-r from-primary-500/60 via-cyan-400/80 to-primary-500/60" />
 
-          <div className="p-4">
+          <div className="p-3 sm:p-4">
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2.5">

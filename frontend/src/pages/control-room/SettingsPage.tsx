@@ -178,7 +178,7 @@ function ProfileSection({ user, updateUser, activeSubTab, onSubTabChange }: {
     <div className="space-y-4">
       {/* Profile Header Card */}
       <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
-        <div className="p-6 flex items-center gap-5">
+        <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
           <div className="relative group">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500/30 to-cyan-500/30 border-2 border-gray-700/50 flex items-center justify-center overflow-hidden">
               {user?.avatar_url ? (
@@ -229,7 +229,7 @@ function ProfileSection({ user, updateUser, activeSubTab, onSubTabChange }: {
               )}
             </div>
           </div>
-          <div className="text-right text-xs text-gray-600">
+          <div className="sm:text-right text-xs text-gray-600">
             <p>Member since</p>
             <p className="text-gray-400">{user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
             {user?.avatar_url && (
@@ -241,7 +241,7 @@ function ProfileSection({ user, updateUser, activeSubTab, onSubTabChange }: {
         </div>
 
         {/* Sub-tabs */}
-        <div className="px-6 pb-3 flex gap-1">
+        <div className="px-4 sm:px-6 pb-3 flex gap-1 overflow-x-auto">
           {PROFILE_SUB_TABS.map((tab) => (
             <button
               key={tab.key}
@@ -308,7 +308,7 @@ function PersonalInfoTab({ user, updateUser }: { user: UserType | null; updateUs
         <Edit3 size={16} className="text-primary-400" />
         <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Personal Information</span>
       </div>
-      <div className="p-5 space-y-4">
+      <div className="p-4 sm:p-5 space-y-4">
         {success && (
           <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm">
             <CheckCircle2 size={16} />

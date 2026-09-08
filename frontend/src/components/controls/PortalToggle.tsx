@@ -65,7 +65,7 @@ export function PortalToggle({ compact = false }: PortalToggleProps) {
     return (
       <button
         onClick={handleCycle}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${config.styles}`}
+        className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${config.styles}`}
         title={config.title}
       >
         {config.icon}
@@ -78,7 +78,7 @@ export function PortalToggle({ compact = false }: PortalToggleProps) {
   return (
     <button
       onClick={handleCycle}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${config.styles}`}
+      className={`flex items-center gap-2 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${config.styles}`}
       title={config.title}
     >
       {config.icon}

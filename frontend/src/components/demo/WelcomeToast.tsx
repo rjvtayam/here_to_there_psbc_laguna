@@ -32,11 +32,11 @@ export function WelcomeToast({ name, campus, role, onComplete }: WelcomeToastPro
 
   return (
     <div
-      className={`fixed top-6 right-6 z-[200] transition-all duration-400 ${
+      className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-[200] transition-all duration-400 ${
         hiding ? 'opacity-0 translate-x-8 scale-95' : visible ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 translate-x-8 scale-95'
       }`}
     >
-      <div className="relative bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/60 shadow-2xl shadow-primary-500/10 overflow-hidden max-w-sm">
+      <div className="relative bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-800/60 shadow-2xl shadow-primary-500/10 overflow-hidden max-w-[calc(100vw-2rem)] sm:max-w-sm">
         {/* Gradient accent */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-500 via-cyan-500 to-purple-500" />
 

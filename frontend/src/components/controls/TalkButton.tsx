@@ -30,7 +30,7 @@ export function TalkButton({ target, isActive, onClick, disabled }: TalkButtonPr
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+      className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
         disabled
           ? 'bg-gray-800 text-gray-600 border border-gray-700/30 cursor-not-allowed opacity-50'
           : isActive
