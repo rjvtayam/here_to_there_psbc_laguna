@@ -326,3 +326,21 @@ body {
 .animate-bounce-in {
   animation: bounce-in 0.5s ease-out;
 }
+
+@keyframes bounce-arrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes bounce-arrow-x {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-6px); }
+}
+
+.animate-bounce-arrow {
+  animation: bounce-arrow 1s ease-in-out infinite;
+}
+
+.animate-bounce-arrow-x {
+  animation: bounce-arrow-x 1s ease-in-out infinite;
+}

@@ -143,31 +143,46 @@ interface LabelPosition {
 }
 
 function ArrowSVG({ dir, color }: { dir: 'up' | 'down' | 'left' | 'right'; color: string }) {
-  // Arrow points in the direction specified
+  const neonGlow = color.includes('cyan')
+    ? '0 0 8px rgba(34,211,238,0.6), 0 0 16px rgba(34,211,238,0.3)'
+    : color.includes('purple')
+    ? '0 0 8px rgba(168,85,247,0.6), 0 0 16px rgba(168,85,247,0.3)'
+    : color.includes('amber')
+    ? '0 0 8px rgba(251,191,36,0.6), 0 0 16px rgba(251,191,36,0.3)'
+    : color.includes('red')
+    ? '0 0 8px rgba(239,68,68,0.6), 0 0 16px rgba(239,68,68,0.3)'
+    : color.includes('blue')
+    ? '0 0 8px rgba(59,130,246,0.6), 0 0 16px rgba(59,130,246,0.3)'
+    : color.includes('pink')
+    ? '0 0 8px rgba(236,72,153,0.6), 0 0 16px rgba(236,72,153,0.3)'
+    : color.includes('green') || color.includes('emerald')
+    ? '0 0 8px rgba(34,197,94,0.6), 0 0 16px rgba(34,197,94,0.3)'
+    : '0 0 8px rgba(156,163,175,0.6), 0 0 16px rgba(156,163,175,0.3)';
+
   if (dir === 'up') {
     return (
-      <svg width="16" height="20" viewBox="0 0 16 20" fill="none" className={`${color} drop-shadow-lg`}>
-        <path d="M8 20V4M8 4L2 10M8 4L14 10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="20" height="26" viewBox="0 0 20 26" fill="none" className={`${color} drop-shadow-lg animate-bounce-arrow`} style={{ filter: `drop-shadow(${neonGlow})` }}>
+        <path d="M10 26V6M10 6L3 13M10 6L17 13" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     );
   }
   if (dir === 'down') {
     return (
-      <svg width="16" height="20" viewBox="0 0 16 20" fill="none" className={`${color} drop-shadow-lg`}>
-        <path d="M8 0V16M8 16L2 10M8 16L14 10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="20" height="26" viewBox="0 0 20 26" fill="none" className={`${color} drop-shadow-lg animate-bounce-arrow`} style={{ filter: `drop-shadow(${neonGlow})` }}>
+        <path d="M10 0V20M10 20L3 13M10 20L17 13" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     );
   }
   if (dir === 'left') {
     return (
-      <svg width="20" height="16" viewBox="0 0 20 16" fill="none" className={`${color} drop-shadow-lg`}>
-        <path d="M20 8H4M4 8L10 2M4 8L10 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="26" height="20" viewBox="0 0 26 20" fill="none" className={`${color} drop-shadow-lg animate-bounce-arrow-x`} style={{ filter: `drop-shadow(${neonGlow})` }}>
+        <path d="M26 10H6M6 10L13 3M6 10L13 17" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     );
   }
   return (
-    <svg width="20" height="16" viewBox="0 0 20 16" fill="none" className={`${color} drop-shadow-lg`}>
-      <path d="M0 8H16M16 8L10 2M16 8L10 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="26" height="20" viewBox="0 0 26 20" fill="none" className={`${color} drop-shadow-lg animate-bounce-arrow-x`} style={{ filter: `drop-shadow(${neonGlow})` }}>
+      <path d="M0 10H20M20 10L13 3M20 10L13 17" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -344,10 +359,8 @@ export function LiveDemo({ isOpen, onClose, userRole }: LiveDemoProps) {
           {/* Layout: arrow → label, or label → arrow depending on direction */}
           {pos.arrowDir === 'down' ? (
             <div className="flex flex-col items-center">
-              {/* Arrow first (top), pointing down toward element */}
               <ArrowSVG dir="down" color={pos.color} />
-              {/* Label chip below */}
-              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border border-gray-700/60 text-[11px] font-semibold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`}>
+              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border text-[11px] font-bold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`} style={{ borderColor: pos.color.includes('cyan') ? 'rgba(34,211,238,0.5)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.5)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.5)' : pos.color.includes('red') ? 'rgba(239,68,68,0.5)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.5)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.5)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.5)' : 'rgba(156,163,175,0.5)', boxShadow: `0 0 10px ${pos.color.includes('cyan') ? 'rgba(34,211,238,0.2)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.2)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.2)' : pos.color.includes('red') ? 'rgba(239,68,68,0.2)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.2)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.2)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.2)' : 'rgba(156,163,175,0.2)'}` }}>
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                 <span className="relative flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${pos.color.replace('text-', 'bg-')}`} />
@@ -357,36 +370,30 @@ export function LiveDemo({ isOpen, onClose, userRole }: LiveDemoProps) {
             </div>
           ) : pos.arrowDir === 'up' ? (
             <div className="flex flex-col items-center">
-              {/* Label chip first (top) */}
-              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border border-gray-700/60 text-[11px] font-semibold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`}>
+              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border text-[11px] font-bold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`} style={{ borderColor: pos.color.includes('cyan') ? 'rgba(34,211,238,0.5)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.5)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.5)' : pos.color.includes('red') ? 'rgba(239,68,68,0.5)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.5)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.5)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.5)' : 'rgba(156,163,175,0.5)', boxShadow: `0 0 10px ${pos.color.includes('cyan') ? 'rgba(34,211,238,0.2)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.2)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.2)' : pos.color.includes('red') ? 'rgba(239,68,68,0.2)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.2)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.2)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.2)' : 'rgba(156,163,175,0.2)'}` }}>
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                 <span className="relative flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${pos.color.replace('text-', 'bg-')}`} />
                   {pos.text}
                 </span>
               </div>
-              {/* Arrow below, pointing up toward element */}
               <ArrowSVG dir="up" color={pos.color} />
             </div>
           ) : pos.arrowDir === 'left' ? (
             <div className="flex items-center">
-              {/* Label chip first (right) */}
-              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border border-gray-700/60 text-[11px] font-semibold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`}>
+              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border text-[11px] font-bold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`} style={{ borderColor: pos.color.includes('cyan') ? 'rgba(34,211,238,0.5)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.5)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.5)' : pos.color.includes('red') ? 'rgba(239,68,68,0.5)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.5)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.5)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.5)' : 'rgba(156,163,175,0.5)', boxShadow: `0 0 10px ${pos.color.includes('cyan') ? 'rgba(34,211,238,0.2)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.2)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.2)' : pos.color.includes('red') ? 'rgba(239,68,68,0.2)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.2)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.2)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.2)' : 'rgba(156,163,175,0.2)'}` }}>
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                 <span className="relative flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${pos.color.replace('text-', 'bg-')}`} />
                   {pos.text}
                 </span>
               </div>
-              {/* Arrow left, pointing left toward element */}
               <ArrowSVG dir="left" color={pos.color} />
             </div>
           ) : (
             <div className="flex items-center">
-              {/* Arrow right, pointing right toward element */}
               <ArrowSVG dir="right" color={pos.color} />
-              {/* Label chip (left) */}
-              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border border-gray-700/60 text-[11px] font-semibold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`}>
+              <div className={`px-3 py-1.5 rounded-lg bg-gray-900/95 border text-[11px] font-bold ${pos.color} whitespace-nowrap shadow-2xl backdrop-blur-sm`} style={{ borderColor: pos.color.includes('cyan') ? 'rgba(34,211,238,0.5)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.5)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.5)' : pos.color.includes('red') ? 'rgba(239,68,68,0.5)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.5)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.5)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.5)' : 'rgba(156,163,175,0.5)', boxShadow: `0 0 10px ${pos.color.includes('cyan') ? 'rgba(34,211,238,0.2)' : pos.color.includes('purple') ? 'rgba(168,85,247,0.2)' : pos.color.includes('amber') ? 'rgba(251,191,36,0.2)' : pos.color.includes('red') ? 'rgba(239,68,68,0.2)' : pos.color.includes('blue') ? 'rgba(59,130,246,0.2)' : pos.color.includes('pink') ? 'rgba(236,72,153,0.2)' : pos.color.includes('green') || pos.color.includes('emerald') ? 'rgba(34,197,94,0.2)' : 'rgba(156,163,175,0.2)'}` }}>
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                 <span className="relative flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${pos.color.replace('text-', 'bg-')}`} />
