@@ -1,18 +1,78 @@
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
-import { Home, Settings, Users, LogOut, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Home, Settings, Users, LogOut, ChevronsLeft, ChevronsRight, X } from 'lucide-react';
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobile?: boolean;
+}
+
+export function Sidebar({ isMobile = false }: SidebarProps) {
   const { user, logout } = useAuthStore();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
   const showUsers = user?.role === 'admin' || user?.role === 'principal';
 
+  if (isMobile) {
+    return (
+      <>
+        {isSidebarOpen && (
+          <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={toggleSidebar} />
+        )}
+        <aside
+          className={`fixed top-0 left-0 h-full w-56 bg-gray-900 border-r border-gray-800 flex flex-col transition-transform duration-300 z-50 ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="h-14 flex items-center justify-between px-4 border-b border-gray-800">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12 L10 7 L10 17 Z" fill="currentColor" />
+                  <path d="M19 12 L14 7 L14 17 Z" fill="currentColor" opacity="0.5" />
+                  <circle cx="12" cy="12" r="1.5" />
+                </svg>
+              </div>
+              <span className="text-sm font-bold text-white truncate">Here to There</span>
+            </div>
+            <button onClick={toggleSidebar} className="p-1 rounded hover:bg-gray-800 text-gray-400">
+              <X size={18} />
+            </button>
+          </div>
+
+          <nav className="flex-1 flex flex-col gap-0.5 py-3">
+            <SidebarLink
+              to={showUsers ? '/control-room' : `/campus/${user?.campus}`}
+              icon={<Home size={18} />}
+              label="Home"
+              isOpen={true}
+              onClick={toggleSidebar}
+            />
+            {showUsers && (
+              <SidebarLink to="/admin/users" icon={<Users size={18} />} label="Users" isOpen={true} onClick={toggleSidebar} />
+            )}
+            {(user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'staff' || user?.role === 'principal') && (
+              <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={true} onClick={toggleSidebar} />
+            )}
+          </nav>
+
+          <div className="px-2 pb-3 pt-1">
+            <button
+              onClick={() => { logout(); toggleSidebar(); }}
+              className="flex items-center gap-3 px-3 w-full py-2 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+            >
+              <LogOut size={17} />
+              <span className="text-sm">Logout</span>
+            </button>
+          </div>
+        </aside>
+      </>
+    );
+  }
+
   return (
     <aside
-      className={`${isSidebarOpen ? 'w-56' : 'w-16'} bg-gray-900 border-r border-gray-800 flex flex-col transition-all duration-300 ease-in-out relative`}
+      className={`${isSidebarOpen ? 'w-56' : 'w-16'} bg-gray-900 border-r border-gray-800 flex flex-col transition-all duration-300 ease-in-out relative hidden md:flex`}
     >
-      {/* Logo area */}
       <div className={`h-14 flex items-center ${isSidebarOpen ? 'px-4' : 'justify-center'} border-b border-gray-800`}>
         {isSidebarOpen ? (
           <div className="flex items-center gap-2.5">
@@ -36,7 +96,6 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* Nav items */}
       <nav className="flex-1 flex flex-col gap-0.5 py-3">
         <SidebarLink
           to={showUsers ? '/control-room' : `/campus/${user?.campus}`}
@@ -44,23 +103,14 @@ export function Sidebar() {
           label="Home"
           isOpen={isSidebarOpen}
         />
-
         {showUsers && (
-          <>
-            <SidebarLink to="/admin/users" icon={<Users size={18} />} label="Users" isOpen={isSidebarOpen} />
-          </>
+          <SidebarLink to="/admin/users" icon={<Users size={18} />} label="Users" isOpen={isSidebarOpen} />
         )}
-
-        {user?.role === 'admin' && (
-          <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={isSidebarOpen} />
-        )}
-
-        {(user?.role === 'teacher' || user?.role === 'staff' || user?.role === 'principal') && (
+        {(user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'staff' || user?.role === 'principal') && (
           <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={isSidebarOpen} />
         )}
       </nav>
 
-      {/* Divider with collapse toggle */}
       <div className="relative mx-3 my-1">
         <div className="border-t border-gray-800" />
         <button
@@ -72,7 +122,6 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* Logout */}
       <div className="px-2 pb-3 pt-1">
         <button
           onClick={logout}
@@ -87,10 +136,11 @@ export function Sidebar() {
   );
 }
 
-function SidebarLink({ to, icon, label, isOpen }: { to: string; icon: React.ReactNode; label: string; isOpen: boolean }) {
+function SidebarLink({ to, icon, label, isOpen, onClick }: { to: string; icon: React.ReactNode; label: string; isOpen: boolean; onClick?: () => void }) {
   return (
     <NavLink
       to={to}
+      onClick={onClick}
       className={({ isActive }) =>
         `flex items-center gap-3 ${isOpen ? 'px-3 mx-2' : 'justify-center mx-2'} py-2 rounded-lg transition-all duration-200 ${
           isActive

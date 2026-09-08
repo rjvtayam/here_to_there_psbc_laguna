@@ -106,7 +106,7 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
     <>
       {isOpen && <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-gray-900 border-l border-gray-700 shadow-2xl z-50 flex flex-col transition-transform duration-250 ease-out ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-80 bg-gray-900 border-l border-gray-700 shadow-2xl z-50 flex flex-col transition-transform duration-250 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >

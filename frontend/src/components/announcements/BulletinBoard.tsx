@@ -130,7 +130,7 @@ export function BulletinBoard() {
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setIsOpen(false)} />
-          <div className="fixed top-0 right-0 h-full w-80 bg-gray-900 border-l border-gray-700 shadow-2xl z-50 flex flex-col animate-slide-in-right">
+          <div className="fixed top-0 right-0 h-full w-full sm:w-80 bg-gray-900 border-l border-gray-700 shadow-2xl z-50 flex flex-col animate-slide-in-right">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <div className="flex items-center gap-2">

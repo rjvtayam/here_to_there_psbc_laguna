@@ -83,16 +83,16 @@ export function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary-500/15 border border-primary-500/20 flex items-center justify-center">
               <Shield size={20} className="text-primary-400" />
             </div>
             <div>
-              <h1 className="font-orbitron text-2xl font-bold text-white">Settings</h1>
-              <p className="text-gray-500 text-sm">Manage your account and preferences</p>
+              <h1 className="font-orbitron text-xl sm:text-2xl font-bold text-white">Settings</h1>
+              <p className="text-gray-500 text-xs sm:text-sm">Manage your account and preferences</p>
             </div>
           </div>
           <Badge variant="info">{user?.role?.toUpperCase()}</Badge>

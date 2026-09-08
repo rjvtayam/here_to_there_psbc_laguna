@@ -22,11 +22,11 @@ export function VideoControls({
   screenShareDisabled,
 }: VideoControlsProps) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1 sm:gap-1.5">
       <button
         onClick={onToggleAudio}
         disabled={audioDisabled}
-        className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+        className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg transition-all duration-200 ${
           audioDisabled
             ? 'bg-gray-800 text-gray-600 border border-gray-700/30 cursor-not-allowed opacity-50'
             : isAudioMuted
@@ -41,7 +41,7 @@ export function VideoControls({
       <button
         onClick={onToggleVideo}
         data-demo="btn-video"
-        className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+        className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg transition-all duration-200 ${
           isVideoOff
             ? 'bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500/30'
             : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-transparent'
@@ -55,7 +55,7 @@ export function VideoControls({
         onClick={onToggleScreenShare}
         disabled={screenShareDisabled}
         data-demo="btn-screen"
-        className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+        className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg transition-all duration-200 ${
           screenShareDisabled
             ? 'bg-gray-800 text-gray-600 border border-gray-700/30 cursor-not-allowed opacity-50'
             : isScreenSharing

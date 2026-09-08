@@ -38,7 +38,7 @@ function Navbar({ onLogin }: { onLogin: () => void }) {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-gray-950/90 backdrop-blur-xl border-b border-gray-800/50 shadow-lg shadow-black/20' : 'bg-transparent'}`}>
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -97,7 +97,7 @@ function HeroSection({ onGetStarted, onWatchDemo }: { onGetStarted: () => void; 
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-500/40 to-transparent" />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-primary-500/10 border border-primary-500/20 rounded-full px-4 py-1.5 mb-8 animate-fade-in">
           <Sparkles size={14} className="text-primary-400" />
@@ -105,42 +105,42 @@ function HeroSection({ onGetStarted, onWatchDemo }: { onGetStarted: () => void; 
         </div>
 
         {/* Heading */}
-        <h1 className="font-orbitron text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-8 animate-fade-in-up whitespace-nowrap">
+        <h1 className="font-orbitron text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-8 animate-fade-in-up">
           Connecting{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 animate-gradient">
             Two Campuses
           </span>
         </h1>
-        <h1 className="font-orbitron text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-8 animate-fade-in-up">
+        <h1 className="font-orbitron text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-8 animate-fade-in-up">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-fuchsia-400 to-pink-500 animate-gradient">
             In Real Time
           </span>
         </h1>
 
         <div className="max-w-2xl mx-auto mb-10 space-y-1">
-          <p className="typing-line text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '1s' }}>
+          <p className="typing-line text-sm sm:text-base md:text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '1s' }}>
             <span className="text-cyan-400">Here to There</span> enables seamless live video communication
           </p>
-          <p className="typing-line text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '2.2s' }}>
+          <p className="typing-line text-sm sm:text-base md:text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '2.2s' }}>
             between PSBC Paete and PSBC Pagsanjan.
           </p>
-          <p className="typing-line text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '3.4s' }}>
+          <p className="typing-line text-sm sm:text-base md:text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '3.4s' }}>
             Conduct meetings, announcements, and school programs
           </p>
-          <p className="typing-line text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '4.6s' }}>
+          <p className="typing-line text-sm sm:text-base md:text-lg text-gray-300 leading-relaxed" style={{ animationDelay: '4.6s' }}>
             across campuses — instantly.
           </p>
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex items-center justify-center gap-4 mb-16 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <button onClick={onGetStarted} className="group relative overflow-hidden bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500 text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-300 shadow-xl shadow-primary-500/20">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-16 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <button onClick={onGetStarted} className="group relative overflow-hidden bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500 text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl transition-all duration-300 shadow-xl shadow-primary-500/20 w-full sm:w-auto">
             <span className="relative flex items-center gap-2">
               Launch Portal
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </span>
           </button>
-          <button onClick={onWatchDemo} className="flex items-center gap-2 text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-6 py-3.5 rounded-xl transition-all duration-300">
+          <button onClick={onWatchDemo} className="flex items-center gap-2 text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-6 py-3 sm:py-3.5 rounded-xl transition-all duration-300 w-full sm:w-auto justify-center">
             <Play size={16} className="text-primary-400" />
             Watch Demo
           </button>
@@ -255,14 +255,14 @@ function StatsSection() {
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-primary-500/5 rounded-full blur-[100px]" />
       </div>
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-5 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 relative z-10">
         {stats.map((s, i) => (
           <div key={i} className="group relative animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
             {/* Animated border glow */}
             <div className="absolute -inset-px rounded-2xl opacity-40 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(135deg, ${s.glow}, transparent, ${s.glow})` }} />
             {/* Pulse ring on hover */}
             <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ boxShadow: `0 0 40px ${s.ring}, inset 0 0 40px ${s.ring}` }} />
-            <div className="relative bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/60 p-6 text-center overflow-hidden transition-all duration-500 group-hover:border-transparent h-full">
+            <div className="relative bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/60 p-4 sm:p-6 text-center overflow-hidden transition-all duration-500 group-hover:border-transparent h-full">
               {/* Corner accents */}
               <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 rounded-tl-2xl opacity-50 group-hover:opacity-100 transition-opacity" style={{ borderColor: s.glow }} />
               <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 rounded-br-2xl opacity-50 group-hover:opacity-100 transition-opacity" style={{ borderColor: s.glow }} />
@@ -340,10 +340,10 @@ function FeaturesSection() {
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary-500/5 rounded-full blur-[120px]" />
-      <div className="max-w-6xl mx-auto px-6 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-16">
           <span className="text-xs font-semibold text-primary-400 uppercase tracking-widest">Features</span>
-          <h2 className="font-orbitron text-3xl sm:text-4xl font-bold mt-3 mb-4">
+          <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">
             Everything You Need for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-cyan-400">
               Campus Communication
@@ -406,13 +406,13 @@ function HowItWorksSection() {
 
   return (
     <section className="py-24 relative">
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
           <span className="text-xs font-semibold text-cyan-400 uppercase tracking-widest">How It Works</span>
-          <h2 className="font-orbitron text-3xl sm:text-4xl font-bold mt-3">Three Steps to Connect</h2>
+          <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3">Three Steps to Connect</h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 relative">
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-8 relative">
           {/* Connector line */}
           <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-primary-500/30 via-cyan-500/30 to-primary-500/30" />
 
@@ -442,10 +442,10 @@ function CampusesSection() {
   return (
     <section className="py-24 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 via-gray-950 to-gray-900/50" />
-      <div className="max-w-6xl mx-auto px-6 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-16">
           <span className="text-xs font-semibold text-primary-400 uppercase tracking-widest">Our Campuses</span>
-          <h2 className="font-orbitron font-orbitron text-3xl sm:text-4xl font-bold mt-3 mb-4">Two Locations, One Connection</h2>
+          <h2 className="font-orbitron font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">Two Locations, One Connection</h2>
           <p className="text-gray-400 max-w-lg mx-auto">
             Paete Science and Business College operates across two campuses in Laguna, now unified through live video.
           </p>
@@ -550,10 +550,10 @@ function FAQSection() {
 
   return (
     <section className="py-24 relative">
-      <div className="max-w-3xl mx-auto px-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
           <span className="text-xs font-semibold text-primary-400 uppercase tracking-widest">FAQ</span>
-          <h2 className="font-orbitron font-orbitron text-3xl sm:text-4xl font-bold mt-3 mb-4">
+          <h2 className="font-orbitron font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">
             Frequently Asked{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-cyan-400">Questions</span>
           </h2>
@@ -608,10 +608,10 @@ function FAQSection() {
 function MapSection() {
   return (
     <section className="py-24 relative">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
           <span className="text-xs font-semibold text-cyan-400 uppercase tracking-widest">Location</span>
-          <h2 className="font-orbitron font-orbitron text-3xl sm:text-4xl font-bold mt-3 mb-4">Laguna, Philippines</h2>
+          <h2 className="font-orbitron font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">Laguna, Philippines</h2>
           <p className="text-gray-400 max-w-lg mx-auto">
             PSBC Paete and PSBC Pagsanjan are located in the province of Laguna, connected through this portal.
           </p>
@@ -765,7 +765,7 @@ function MapSection() {
 function CTASection({ onGetStarted }: { onGetStarted: () => void }) {
   return (
     <section className="py-24 relative">
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="relative group">
           {/* Outer glow */}
           <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 via-primary-500/30 to-pink-500/30 rounded-3xl blur-xl opacity-40 group-hover:opacity-80 transition-opacity duration-700" />
@@ -783,7 +783,7 @@ function CTASection({ onGetStarted }: { onGetStarted: () => void }) {
             <div className="absolute top-0 left-1/4 w-40 h-40 bg-cyan-500/10 rounded-full blur-[80px]" />
             <div className="absolute bottom-0 right-1/4 w-40 h-40 bg-purple-500/10 rounded-full blur-[80px]" />
             {/* Content */}
-            <div className="relative z-10 text-center py-16 px-8">
+            <div className="relative z-10 text-center py-10 sm:py-16 px-4 sm:px-8">
               {/* Icon row */}
               <div className="flex items-center justify-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center text-cyan-400 animate-fade-in" style={{ animationDelay: '0s' }}>
@@ -838,7 +838,7 @@ function CTASection({ onGetStarted }: { onGetStarted: () => void }) {
 function Footer() {
   return (
     <footer className="border-t border-gray-800/50 py-10">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center">

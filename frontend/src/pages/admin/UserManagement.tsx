@@ -173,16 +173,16 @@ export function UserManagement() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500/20 to-cyan-500/20 border border-primary-500/20 flex items-center justify-center">
-              <Users size={24} className="text-primary-400" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-primary-500/20 to-cyan-500/20 border border-primary-500/20 flex items-center justify-center">
+              <Users size={20} className="text-primary-400 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h1 className="font-orbitron text-2xl font-bold text-white">User Management</h1>
-              <p className="text-gray-500 text-sm">
+              <h1 className="font-orbitron text-xl sm:text-2xl font-bold text-white">User Management</h1>
+              <p className="text-gray-500 text-xs sm:text-sm">
                 {users.length} registered user(s)
                 {isAdmin && <span className="ml-2 text-primary-400">(Admin)</span>}
                 {isPrincipal && <span className="ml-2 text-amber-400">(Principal)</span>}

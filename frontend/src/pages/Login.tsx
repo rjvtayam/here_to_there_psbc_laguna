@@ -129,7 +129,7 @@ export function Login() {
                 <circle cx="12" cy="12" r="2" fill="currentColor" />
               </svg>
             </div>
-            <h1 className="font-orbitron text-4xl font-extrabold text-white tracking-tight">
+            <h1 className="font-orbitron text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
               Here to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-cyan-400">There</span>
             </h1>
           </div>
@@ -143,7 +143,7 @@ export function Login() {
 
         <div className="relative">
           <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-primary-500/20 via-cyan-500/10 to-transparent blur-sm" />
-          <div className="relative bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/60 p-8 shadow-2xl">
+          <div className="relative bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/60 p-6 sm:p-8 shadow-2xl">
             <div className="flex items-center gap-2.5 mb-6">
               <div className="w-8 h-8 rounded-lg bg-primary-500/15 flex items-center justify-center">
                 {requires2FA ? <KeyRound size={16} className="text-primary-400" /> : <Shield size={16} className="text-primary-400" />}

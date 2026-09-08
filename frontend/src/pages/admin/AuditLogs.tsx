@@ -40,11 +40,11 @@ export function AuditLogs() {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <h1 className="font-orbitron text-2xl font-bold text-white mb-6">Audit Logs</h1>
+      <div className="p-4 sm:p-6">
+        <h1 className="font-orbitron text-xl sm:text-2xl font-bold text-white mb-6">Audit Logs</h1>
 
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <table className="w-full">
+        <div className="bg-gray-800 rounded-lg overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gray-700">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-white">Timestamp</th>

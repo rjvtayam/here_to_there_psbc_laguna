@@ -57,7 +57,7 @@ export function VideoCard({
     : '';
 
   return (
-    <div className={`relative rounded-xl overflow-hidden bg-gray-900 border border-gray-800/60 group transition-all duration-300 ${highlightClasses} ${isSmall ? 'h-32' : isScreenShare ? 'h-full' : 'h-full max-h-[500px]'}`}>
+    <div className={`relative rounded-xl overflow-hidden bg-gray-900 border border-gray-800/60 group transition-all duration-300 ${highlightClasses} ${isSmall ? 'h-20 sm:h-24 md:h-32' : isScreenShare ? 'h-full' : 'h-full max-h-[500px]'}`}>
       {stream && !isVideoOff ? (
         <video
           ref={videoRef}
@@ -93,7 +93,7 @@ export function VideoCard({
             <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${colors.bg} ${colors.text}`}>
               {campus === 'control_room' ? 'CTRL' : campus.toUpperCase().slice(0, 4)}
             </span>
-            <span className="text-white text-xs font-medium truncate max-w-[100px]">
+            <span className="text-white text-[10px] sm:text-xs font-medium truncate max-w-[60px] sm:max-w-[100px]">
               {isLocal ? 'You' : name}
             </span>
           </div>
