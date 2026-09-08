@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Video, Monitor, Shield, Wifi, Play, Mic,
-  ScreenShare, Bell, Globe, Zap, Sparkles, ArrowRight, Clock, Radio, Signal
+  ScreenShare, Bell, Globe, Zap, Sparkles, ArrowRight, Clock, Radio, Signal,
+  MessageSquare, CircleDot, Users, KeyRound, FileText, Settings,
+  Headphones, CheckCircle2,
+  Lock, Eye, Fingerprint, Mail, MapPin, Phone
 } from 'lucide-react';
 import { DemoTour } from '../components/demo/DemoTour';
 
@@ -18,8 +21,13 @@ export function LandingPage() {
       <FeaturesSection />
       <HowItWorksSection />
       <CampusesSection />
+      <SecuritySection />
+      <BrowserCompatSection />
+      <TechStackSection />
+      <TestimonialsSection />
       <FAQSection />
       <MapSection />
+      <ContactSection />
       <CTASection onGetStarted={() => navigate('/login')} />
       <Footer />
       <DemoTour isOpen={demoOpen} onClose={() => setDemoOpen(false)} />
@@ -298,38 +306,56 @@ function FeaturesSection() {
     {
       icon: <Video size={22} />,
       title: 'Live Video Communication',
-      desc: 'Crystal-clear two-way video between campuses using WebRTC peer-to-peer technology.',
+      desc: 'Crystal-clear two-way video between campuses using WebRTC peer-to-peer technology with sub-100ms latency.',
       color: 'from-blue-500 to-primary-500',
     },
     {
       icon: <ScreenShare size={22} />,
       title: 'Screen Sharing',
-      desc: 'Share presentations, documents, and announcements in real time to both campuses simultaneously.',
+      desc: 'Share presentations, documents, and announcements in real time. Google Meet-style layout with presenter spotlight.',
       color: 'from-purple-500 to-pink-500',
     },
     {
       icon: <Mic size={22} />,
       title: 'Selective Audio',
-      desc: 'Talk to one campus or both at once. The principal has full control over audio routing.',
+      desc: 'Talk to Paete, Pagsanjan, or both campuses at once. Teachers, staff, and principals all have independent audio controls.',
       color: 'from-cyan-500 to-blue-500',
+    },
+    {
+      icon: <MessageSquare size={22} />,
+      title: 'In-Call Text Chat',
+      desc: 'Real-time text messaging with campus-specific or broadcast channels. Send to all users or filter by campus.',
+      color: 'from-indigo-500 to-blue-500',
     },
     {
       icon: <Bell size={22} />,
       title: 'Emergency Broadcast',
-      desc: 'Instantly override all screens with emergency alerts when urgent communication is needed.',
+      desc: 'Instantly override all campus screens with red emergency alerts. Scoped to campus or broadcast to all depending on mode.',
       color: 'from-red-500 to-orange-500',
     },
     {
-      icon: <Radio size={22} />,
-      title: 'Bulletin Board',
-      desc: 'Push announcements, schedules, and important notices to both campus displays.',
+      icon: <CircleDot size={22} />,
+      title: 'Portal & Meeting Modes',
+      desc: 'Three modes: LIVE (cross-campus), PORTAL (always-on campus presence), and IN MEETING (restricted private session).',
       color: 'from-green-500 to-emerald-500',
     },
     {
-      icon: <Shield size={22} />,
-      title: 'Role-Based Access',
-      desc: 'Secure authentication with distinct roles for principals, admins, teachers, and staff.',
+      icon: <KeyRound size={22} />,
+      title: 'Two-Factor Authentication',
+      desc: 'TOTP-based 2FA with QR code setup. Account lockout protection, bcrypt hashing, and JWT session management.',
       color: 'from-amber-500 to-yellow-500',
+    },
+    {
+      icon: <Users size={22} />,
+      title: 'Role-Based Access Control',
+      desc: 'Four roles: Admin, Principal, Teacher, Staff. Principals create staff only; admins manage all. Campus-locked permissions.',
+      color: 'from-rose-500 to-pink-500',
+    },
+    {
+      icon: <Settings size={22} />,
+      title: 'Device & Audio Settings',
+      desc: 'Camera/mic selection, HD video toggle, echo cancellation, noise suppression, live mic level testing, and volume control.',
+      color: 'from-teal-500 to-cyan-500',
     },
   ];
 
@@ -356,7 +382,7 @@ function FeaturesSection() {
 
         {/* 3D Carousel */}
         <div className="carousel-wrapper relative flex justify-center items-center" style={{ height: '420px', perspective: '1200px' }}>
-          <div className="carousel-track relative w-[280px] h-[320px]" style={{ transformStyle: 'preserve-3d', animation: 'carousel-spin 20s linear infinite' }}>
+          <div className="carousel-track relative w-[280px] h-[320px]" style={{ transformStyle: 'preserve-3d', animation: 'carousel-spin 24s linear infinite' }}>
             {features.map((f, i) => (
               <div
                 key={i}
@@ -513,6 +539,319 @@ function CampusesSection() {
   );
 }
 
+/* ─── SECURITY & PRIVACY ─── */
+function SecuritySection() {
+  const items = [
+    {
+      icon: <Lock size={22} />,
+      title: 'End-to-End Encryption',
+      desc: 'All video streams encrypted with DTLS-SRTP, built into the WebRTC standard. No data passes through our servers.',
+      color: 'text-cyan-400',
+      bg: 'bg-cyan-500/10',
+      glow: 'rgba(34,211,238,0.15)',
+    },
+    {
+      icon: <KeyRound size={22} />,
+      title: 'Two-Factor Authentication',
+      desc: 'Optional TOTP-based 2FA with QR code setup. Adds an extra layer of security beyond password login.',
+      color: 'text-purple-400',
+      bg: 'bg-purple-500/10',
+      glow: 'rgba(168,85,247,0.15)',
+    },
+    {
+      icon: <Shield size={22} />,
+      title: 'JWT + bcrypt',
+      desc: 'Passwords hashed with bcrypt. Sessions secured with 256-bit JWT secrets. HTTP-only cookies prevent XSS.',
+      color: 'text-green-400',
+      bg: 'bg-green-500/10',
+      glow: 'rgba(34,197,94,0.15)',
+    },
+    {
+      icon: <Eye size={22} />,
+      title: 'Account Lockout Protection',
+      desc: 'Automatic account lockout after failed login attempts. Rate limiting prevents brute-force attacks.',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10',
+      glow: 'rgba(251,191,36,0.15)',
+    },
+    {
+      icon: <FileText size={22} />,
+      title: 'Audit Logging',
+      desc: 'Every action tracked: logins, session starts, emergency triggers, user changes. Full accountability trail.',
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/10',
+      glow: 'rgba(59,130,246,0.15)',
+    },
+    {
+      icon: <Fingerprint size={22} />,
+      title: 'Role-Based Permissions',
+      desc: 'Strict access control. Teachers and staff see only their campus. Admins and principals have elevated privileges.',
+      color: 'text-pink-400',
+      bg: 'bg-pink-500/10',
+      glow: 'rgba(236,72,153,0.15)',
+    },
+  ];
+
+  return (
+    <section className="py-24 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900/50 to-gray-950" />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="text-center mb-16">
+          <span className="text-xs font-semibold text-green-400 uppercase tracking-widest">Security</span>
+          <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">
+            Enterprise-Grade{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
+              Security & Privacy
+            </span>
+          </h2>
+          <p className="text-gray-400 max-w-xl mx-auto">
+            Your communication is protected by the same encryption standards used by banks and governments.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item, i) => (
+            <div
+              key={i}
+              className="group bg-gray-900/60 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-6 hover:border-gray-700/60 transition-all duration-300 animate-fade-in-up"
+              style={{ animationDelay: `${i * 0.08}s` }}
+            >
+              <div className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <span className={item.color}>{item.icon}</span>
+              </div>
+              <h3 className="font-orbitron text-sm font-bold text-white mb-2">{item.title}</h3>
+              <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── BROWSER COMPATIBILITY + SYSTEM REQUIREMENTS ─── */
+function BrowserCompatSection() {
+  const browsers = [
+    { name: 'Chrome', version: '90+', color: 'from-red-500 to-yellow-500' },
+    { name: 'Firefox', version: '88+', color: 'from-orange-500 to-purple-500' },
+    { name: 'Edge', version: '90+', color: 'from-blue-500 to-cyan-500' },
+    { name: 'Safari', version: '14+', color: 'from-blue-400 to-blue-600' },
+  ];
+
+  const requirements = [
+    { icon: <Monitor size={18} />, label: 'Display', desc: 'TV or monitor per campus' },
+    { icon: <Video size={18} />, label: 'Webcam', desc: 'USB webcam (720p+)' },
+    { icon: <Headphones size={18} />, label: 'Audio', desc: 'Speakers or headset' },
+    { icon: <Wifi size={18} />, label: 'Internet', desc: 'Stable broadband (5+ Mbps)' },
+  ];
+
+  return (
+    <section className="py-24 relative">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+          {/* Browser Compatibility */}
+          <div>
+            <span className="text-xs font-semibold text-purple-400 uppercase tracking-widest">Compatibility</span>
+            <h2 className="font-orbitron text-2xl sm:text-3xl font-bold mt-3 mb-6">
+              Works in Your{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Browser</span>
+            </h2>
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              No downloads. No plugins. Just open your browser and connect. Here to There runs entirely in the web.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {browsers.map((b, i) => (
+                <div key={i} className="flex items-center gap-3 bg-gray-900/60 rounded-xl border border-gray-800/50 p-4 group hover:border-gray-700/60 transition-all">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center`}>
+                    <Globe size={18} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{b.name}</p>
+                    <p className="text-[10px] text-gray-500">{b.version}</p>
+                  </div>
+                  <CheckCircle2 size={16} className="text-green-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* System Requirements */}
+          <div>
+            <span className="text-xs font-semibold text-cyan-400 uppercase tracking-widest">Requirements</span>
+            <h2 className="font-orbitron text-2xl sm:text-3xl font-bold mt-3 mb-6">
+              What You{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Need</span>
+            </h2>
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              Each campus needs basic video conferencing equipment. The system handles everything else.
+            </p>
+            <div className="space-y-3">
+              {requirements.map((r, i) => (
+                <div key={i} className="flex items-center gap-4 bg-gray-900/60 rounded-xl border border-gray-800/50 p-4 group hover:border-gray-700/60 transition-all">
+                  <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                    {r.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{r.label}</p>
+                    <p className="text-[11px] text-gray-500">{r.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── TECH STACK ─── */
+function TechStackSection() {
+  const stacks = [
+    { name: 'WebRTC', desc: 'Peer-to-peer video', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { name: 'React', desc: 'Frontend UI', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+    { name: 'Socket.IO', desc: 'Real-time signaling', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { name: 'FastAPI', desc: 'Backend API', color: 'text-green-400', bg: 'bg-green-500/10' },
+    { name: 'PostgreSQL', desc: 'Database', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { name: 'TypeScript', desc: 'Type safety', color: 'text-primary-400', bg: 'bg-primary-500/10' },
+    { name: 'Tailwind CSS', desc: 'Styling', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { name: 'Zustand', desc: 'State management', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  ];
+
+  return (
+    <section className="py-20 relative border-y border-gray-800/50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <span className="text-xs font-semibold text-primary-400 uppercase tracking-widest">Technology</span>
+          <h2 className="font-orbitron text-2xl sm:text-3xl font-bold mt-3">
+            Built With Modern{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-cyan-400">Technology</span>
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {stacks.map((s, i) => (
+            <div
+              key={i}
+              className="bg-gray-900/60 rounded-xl border border-gray-800/50 p-4 text-center group hover:border-gray-700/60 transition-all duration-300 animate-fade-in-up"
+              style={{ animationDelay: `${i * 0.05}s` }}
+            >
+              <div className={`text-sm font-orbitron font-bold ${s.color} mb-1`}>{s.name}</div>
+              <div className="text-[10px] text-gray-500">{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── TESTIMONIALS ─── */
+function TestimonialsSection() {
+  const testimonials = [
+    {
+      quote: "Here to There has transformed how our campuses communicate. What used to require physical travel now happens instantly through the portal.",
+      name: 'Campus Administrator',
+      role: 'PSBC Paete',
+      color: 'border-cyan-500/30',
+    },
+    {
+      quote: "The emergency broadcast feature gives us peace of mind. In urgent situations, we can reach both campuses simultaneously.",
+      name: 'School Principal',
+      role: 'PSBC Pagsanjan',
+      color: 'border-purple-500/30',
+    },
+    {
+      quote: "Teachers love the simplicity. No downloads, no accounts on third-party apps — just open the browser and start communicating.",
+      name: 'IT Coordinator',
+      role: 'PSBC Laguna',
+      color: 'border-green-500/30',
+    },
+  ];
+
+  return (
+    <section className="py-24 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900/30 to-gray-950" />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="text-center mb-16">
+          <span className="text-xs font-semibold text-amber-400 uppercase tracking-widest">Testimonials</span>
+          <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">
+            Trusted by{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">Educators</span>
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {testimonials.map((t, i) => (
+            <div
+              key={i}
+              className={`bg-gray-900/60 backdrop-blur-sm rounded-2xl border ${t.color} p-6 relative animate-fade-in-up`}
+              style={{ animationDelay: `${i * 0.15}s` }}
+            >
+              <div className="text-primary-400 text-3xl font-serif mb-4">"</div>
+              <p className="text-sm text-gray-300 leading-relaxed mb-6">{t.quote}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 text-sm font-bold">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{t.name}</p>
+                  <p className="text-[10px] text-gray-500">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── CONTACT / SUPPORT ─── */
+function ContactSection() {
+  return (
+    <section className="py-24 relative">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <span className="text-xs font-semibold text-primary-400 uppercase tracking-widest">Support</span>
+          <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">
+            Need{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-cyan-400">Help?</span>
+          </h2>
+          <p className="text-gray-400 max-w-lg mx-auto">
+            Our team is ready to assist with setup, training, and technical support.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div className="bg-gray-900/60 rounded-2xl border border-gray-800/50 p-6 text-center group hover:border-primary-500/30 transition-all duration-300">
+            <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <Mail size={20} className="text-primary-400" />
+            </div>
+            <h3 className="text-sm font-bold text-white mb-1">Email Us</h3>
+            <p className="text-[11px] text-gray-500">support@heretothere.edu.ph</p>
+          </div>
+
+          <div className="bg-gray-900/60 rounded-2xl border border-gray-800/50 p-6 text-center group hover:border-cyan-500/30 transition-all duration-300">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <Phone size={20} className="text-cyan-400" />
+            </div>
+            <h3 className="text-sm font-bold text-white mb-1">Call Us</h3>
+            <p className="text-[11px] text-gray-500">(049) 555-0123</p>
+          </div>
+
+          <div className="bg-gray-900/60 rounded-2xl border border-gray-800/50 p-6 text-center group hover:border-green-500/30 transition-all duration-300">
+            <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <MapPin size={20} className="text-green-400" />
+            </div>
+            <h3 className="text-sm font-bold text-white mb-1">Visit Us</h3>
+            <p className="text-[11px] text-gray-500">Paete & Pagsanjan, Laguna</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── FAQ ─── */
 function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -532,19 +871,31 @@ function FAQSection() {
     },
     {
       q: 'Can the principal talk to both campuses at once?',
-      a: 'Yes. The Control Room supports "Talk to Both" mode, as well as selective audio to speak to Paete or Pagsanjan individually.',
+      a: 'Yes. The Control Room supports "Talk to Both" mode, as well as selective audio to speak to Paete or Pagsanjan individually. Teachers and staff also have their own talk buttons.',
     },
     {
       q: 'What happens during an emergency?',
-      a: 'The principal can trigger an Emergency Broadcast from the Control Room, which immediately overrides all campus screens with an alert, ensuring urgent messages are seen by everyone.',
+      a: 'The principal can trigger an Emergency Broadcast from the Control Room, which immediately overrides all campus screens with an alert. It can be scoped to a single campus or broadcast to both.',
     },
     {
       q: 'Is the connection secure?',
-      a: 'Yes. All video streams are encrypted end-to-end using DTLS-SRTP (built into WebRTC), and user authentication uses JWT tokens with bcrypt password hashing.',
+      a: 'Yes. All video streams are encrypted end-to-end using DTLS-SRTP (built into WebRTC), and user authentication uses JWT tokens with bcrypt password hashing. Two-factor authentication is also available.',
     },
     {
       q: 'What equipment do the campuses need?',
-      a: 'Each campus needs a display screen (TV or monitor), a webcam, speakers, and a stable internet connection. The system runs in any modern web browser — no software installation required.',
+      a: 'Each campus needs a display screen (TV or monitor), a webcam, speakers, and a stable internet connection (5+ Mbps). The system runs in Chrome, Firefox, Edge, or Safari — no installation required.',
+    },
+    {
+      q: 'Can I use it on a tablet or phone?',
+      a: 'Here to There is designed for desktop/laptop browsers with webcam support. While the interface is responsive, we recommend using a computer with a webcam for the best video conferencing experience.',
+    },
+    {
+      q: 'Is there text chat during video calls?',
+      a: 'Yes. The built-in chat panel lets you send messages to everyone or filter by campus. Messages are delivered in real time via WebSocket connections.',
+    },
+    {
+      q: 'Can sessions be recorded?',
+      a: 'Yes. The Control Room supports session recording. Recordings are saved as WebM files and can be downloaded or deleted from the recordings manager.',
     },
   ];
 
@@ -854,9 +1205,9 @@ function Footer() {
             Capstone Project &copy; 2026 &mdash; PSBC Paete &amp; PSBC Pagsanjan
           </p>
           <div className="flex gap-4">
+            <a href="mailto:support@heretothere.edu.ph" className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Support</a>
             <span className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Privacy</span>
             <span className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Terms</span>
-            <span className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Support</span>
           </div>
         </div>
       </div>
