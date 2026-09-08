@@ -455,21 +455,15 @@ function FeaturesSection() {
                     </span>
                   </div>
 
-                  {/* Icon container with glass bg */}
+                  {/* Icon container with solid neon bg */}
                   <div className="flex-1 flex flex-col items-center justify-center px-4 pt-3 pb-1">
                     <div
                       className="w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300 relative"
                       style={{
-                        background: `linear-gradient(135deg, ${f.neon}30, ${f.neon}10)`,
-                        border: `1px solid ${f.neon}25`,
-                        boxShadow: `0 0 20px ${f.neon}20, 0 4px 12px rgba(0,0,0,0.3)`,
+                        background: f.neon,
+                        boxShadow: `0 0 20px ${f.neon}40, 0 4px 12px rgba(0,0,0,0.3)`,
                       }}
                     >
-                      {/* Inner glow ring */}
-                      <div
-                        className="absolute inset-0 rounded-2xl opacity-40"
-                        style={{ boxShadow: `inset 0 0 12px ${f.neon}25` }}
-                      />
                       <span className="relative z-10">{f.icon}</span>
                     </div>
 
@@ -483,8 +477,13 @@ function FeaturesSection() {
                     <p className="text-[10px] text-gray-400 leading-relaxed">{f.desc}</p>
                   </div>
 
-                  {/* Bottom accent bar */}
-                  <div className="h-[2px] w-full mt-auto" style={{ background: `linear-gradient(90deg, transparent, ${f.neon}30, transparent)` }} />
+                  {/* Bottom glow dot */}
+                  <div className="flex justify-center pb-2 mt-auto">
+                    <div
+                      className="w-1.5 h-1.5 rounded-full animate-pulse"
+                      style={{ background: f.neon, boxShadow: `0 0 8px ${f.neon}` }}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
