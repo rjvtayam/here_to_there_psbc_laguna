@@ -794,58 +794,104 @@ function BrowserCompatSection() {
 
 /* ─── TESTIMONIALS ─── */
 function TestimonialsSection() {
-  const testimonials = [
-    {
-      quote: "Here to There has transformed how our campuses communicate. What used to require physical travel now happens instantly through the portal.",
-      name: 'Campus Administrator',
-      role: 'PSBC Paete',
-      color: 'border-cyan-500/30',
-    },
-    {
-      quote: "The emergency broadcast feature gives us peace of mind. In urgent situations, we can reach both campuses simultaneously.",
-      name: 'School Principal',
-      role: 'PSBC Pagsanjan',
-      color: 'border-purple-500/30',
-    },
-    {
-      quote: "Teachers love the simplicity. No downloads, no accounts on third-party apps — just open the browser and start communicating.",
-      name: 'IT Coordinator',
-      role: 'PSBC Laguna',
-      color: 'border-green-500/30',
-    },
+  const row1 = [
+    { quote: "Here to There has transformed how our campuses communicate. What used to require physical travel now happens instantly.", name: 'Campus Admin', role: 'PSBC Paete', neon: '#06b6d4' },
+    { quote: "The emergency broadcast feature gives us peace of mind. We can reach both campuses in seconds.", name: 'School Principal', role: 'PSBC Pagsanjan', neon: '#a855f7' },
+    { quote: "Teachers love the simplicity. No downloads — just open the browser and start communicating.", name: 'IT Coordinator', role: 'PSBC Laguna', neon: '#22c55e' },
+    { quote: "Screen sharing during meetings is seamless. Presentations look crystal clear on both ends.", name: 'Faculty Head', role: 'PSBC Paete', neon: '#f59e0b' },
+    { quote: "The portal mode keeps our campuses connected 24/7. It feels like we're in the same building.", name: 'Admin Staff', role: 'PSBC Pagsanjan', neon: '#ef4444' },
+    { quote: "We conduct school programs across campuses without any delays. The latency is impressively low.", name: 'Program Director', role: 'PSBC Paete', neon: '#6366f1' },
+    { quote: "Setup was incredibly easy. Within minutes both campuses were live and connected.", name: 'Tech Support', role: 'PSBC Laguna', neon: '#f43f5e' },
+    { quote: "The chat feature lets students ask questions during cross-campus lectures without interrupting.", name: 'Lecturer', role: 'PSBC Paete', neon: '#14b8a6' },
+    { quote: "Audio quality is outstanding. Selective talk lets me address each campus individually.", name: 'Department Head', role: 'PSBC Pagsanjan', neon: '#3b82f6' },
+    { quote: "Recording sessions means students who missed class can catch up easily.", name: 'Dean of Students', role: 'PSBC Paete', neon: '#8b5cf6' },
+    { quote: "Role-based access ensures only authorized staff can control the portal. Very secure.", name: 'Security Officer', role: 'PSBC Laguna', neon: '#ec4899' },
+    { quote: "Our parents appreciate live-streamed school events. It bridges the distance for families.", name: 'Parent Rep', role: 'PSBC Pagsanjan', neon: '#10b981' },
   ];
 
+  const row2 = [
+    { quote: "The bulletin board keeps both campuses informed about schedules and announcements.", name: 'Registrar', role: 'PSBC Paete', neon: '#f97316' },
+    { quote: "During emergencies, the instant override feature ensures no one misses critical alerts.", name: 'Safety Officer', role: 'PSBC Pagsanjan', neon: '#ef4444' },
+    { quote: "The two-factor authentication gives us confidence that our system is well protected.", name: 'Network Admin', role: 'PSBC Laguna', neon: '#06b6d4' },
+    { quote: "Split-screen view lets the principal monitor both campuses at the same time.", name: 'Office Staff', role: 'PSBC Paete', neon: '#a855f7' },
+    { quote: "I can adjust my camera and mic settings per session. The device controls are very intuitive.", name: 'Faculty Member', role: 'PSBC Pagsanjan', neon: '#22c55e' },
+    { quote: "Cross-campus meetings used to take an hour of travel. Now they take zero.", name: 'Campus Director', role: 'PSBC Paete', neon: '#f59e0b' },
+    { quote: "The notification system ensures no important bulletin goes unread across campuses.", name: 'Admin Asst.', role: 'PSBC Pagsanjan', neon: '#6366f1' },
+    { quote: "Even on slower connections, the video adapts and stays usable. Very reliable.", name: 'Student Rep', role: 'PSBC Laguna', neon: '#f43f5e' },
+    { quote: "We've reduced travel costs significantly since adopting Here to There.", name: 'Finance Head', role: 'PSBC Paete', neon: '#14b8a6' },
+    { quote: "The welcome demo tour helped new users get comfortable with the system right away.", name: 'Training Lead', role: 'PSBC Pagsanjan', neon: '#3b82f6' },
+    { quote: "Volume controls per user let me adjust audio without affecting others on the call.", name: 'AV Technician', role: 'PSBC Paete', neon: '#8b5cf6' },
+    { quote: "This platform is exactly what intercampus education needed. Simple yet powerful.", name: 'Project Lead', role: 'PSBC Laguna', neon: '#ec4899' },
+  ];
+
+  const TestimonialCard = ({ t }: { t: typeof row1[0] }) => (
+    <div
+      className="flex-shrink-0 w-[260px] rounded-xl p-4 relative overflow-hidden group"
+      style={{
+        background: 'linear-gradient(160deg, rgba(20,27,45,0.95) 0%, rgba(10,15,25,0.98) 100%)',
+        border: `1px solid ${t.neon}30`,
+        boxShadow: `0 0 15px ${t.neon}10, 0 4px 20px rgba(0,0,0,0.4)`,
+      }}
+    >
+      {/* Top accent */}
+      <div className="absolute top-0 left-0 right-0 h-[1.5px]" style={{ background: `linear-gradient(90deg, transparent, ${t.neon}60, transparent)` }} />
+
+      {/* Quote mark */}
+      <div className="text-lg font-serif mb-2 leading-none" style={{ color: t.neon, opacity: 0.6 }}>"</div>
+
+      {/* Quote text */}
+      <p className="text-[11px] text-gray-300 leading-relaxed mb-3">{t.quote}</p>
+
+      {/* Author */}
+      <div className="flex items-center gap-2">
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+          style={{ background: `${t.neon}30`, border: `1px solid ${t.neon}40` }}
+        >
+          {t.name.charAt(0)}
+        </div>
+        <div>
+          <p className="text-[10px] font-semibold text-white">{t.name}</p>
+          <p className="text-[9px] text-gray-500">{t.role}</p>
+        </div>
+      </div>
+
+      {/* Bottom dot */}
+      <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full animate-pulse" style={{ background: t.neon, boxShadow: `0 0 6px ${t.neon}` }} />
+    </div>
+  );
+
   return (
-    <section className="py-24 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900/30 to-gray-950" />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-16">
+    <section className="py-20 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="text-center mb-12">
           <span className="text-xs font-semibold text-amber-400 uppercase tracking-widest">Testimonials</span>
           <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">
             Trusted by{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">Educators</span>
           </h2>
+          <p className="text-gray-400 max-w-lg mx-auto text-sm">What our campus community says about Here to There.</p>
         </div>
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
-            <div
-              key={i}
-              className={`bg-gray-900/60 backdrop-blur-sm rounded-2xl border ${t.color} p-6 relative animate-fade-in-up`}
-              style={{ animationDelay: `${i * 0.15}s` }}
-            >
-              <div className="text-primary-400 text-3xl font-serif mb-4">"</div>
-              <p className="text-sm text-gray-300 leading-relaxed mb-6">{t.quote}</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 text-sm font-bold">
-                  {t.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{t.name}</p>
-                  <p className="text-[10px] text-gray-500">{t.role}</p>
-                </div>
-              </div>
-            </div>
+      {/* Row 1 — scrolling left */}
+      <div className="relative mb-4">
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
+        <div className="flex gap-4 marquee-left" style={{ width: 'max-content' }}>
+          {[...row1, ...row1].map((t, i) => (
+            <TestimonialCard key={`r1-${i}`} t={t} />
+          ))}
+        </div>
+      </div>
+
+      {/* Row 2 — scrolling right */}
+      <div className="relative">
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
+        <div className="flex gap-4 marquee-right" style={{ width: 'max-content' }}>
+          {[...row2, ...row2].map((t, i) => (
+            <TestimonialCard key={`r2-${i}`} t={t} />
           ))}
         </div>
       </div>
