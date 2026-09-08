@@ -210,6 +210,11 @@ body {
   to { transform: rotateY(360deg); }
 }
 
+@keyframes carousel-3d-shine {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.15; }
+}
+
 /* Sharp light trails - horizontal */
 .light-trail {
   position: absolute;
