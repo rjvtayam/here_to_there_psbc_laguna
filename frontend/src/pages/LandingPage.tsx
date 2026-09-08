@@ -23,7 +23,6 @@ export function LandingPage() {
       <CampusesSection />
       <SecuritySection />
       <BrowserCompatSection />
-      <TechStackSection />
       <TestimonialsSection />
       <FAQSection />
       <MapSection />
@@ -361,7 +360,7 @@ function FeaturesSection() {
 
   const count = features.length;
   const angleStep = 360 / count;
-  const radius = 340;
+  const radius = 460;
 
   return (
     <section className="py-24 relative overflow-hidden">
@@ -382,7 +381,7 @@ function FeaturesSection() {
 
         {/* 3D Carousel */}
         <div className="carousel-wrapper relative flex justify-center items-center" style={{ height: '420px', perspective: '1200px' }}>
-          <div className="carousel-track relative w-[280px] h-[320px]" style={{ transformStyle: 'preserve-3d', animation: 'carousel-spin 24s linear infinite' }}>
+          <div className="carousel-track relative w-[280px] h-[320px]" style={{ transformStyle: 'preserve-3d', animation: 'carousel-spin 30s linear infinite' }}>
             {features.map((f, i) => (
               <div
                 key={i}
@@ -699,46 +698,6 @@ function BrowserCompatSection() {
               ))}
             </div>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── TECH STACK ─── */
-function TechStackSection() {
-  const stacks = [
-    { name: 'WebRTC', desc: 'Peer-to-peer video', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-    { name: 'React', desc: 'Frontend UI', color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { name: 'Socket.IO', desc: 'Real-time signaling', color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { name: 'FastAPI', desc: 'Backend API', color: 'text-green-400', bg: 'bg-green-500/10' },
-    { name: 'PostgreSQL', desc: 'Database', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { name: 'TypeScript', desc: 'Type safety', color: 'text-primary-400', bg: 'bg-primary-500/10' },
-    { name: 'Tailwind CSS', desc: 'Styling', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-    { name: 'Zustand', desc: 'State management', color: 'text-amber-400', bg: 'bg-amber-500/10' },
-  ];
-
-  return (
-    <section className="py-20 relative border-y border-gray-800/50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <span className="text-xs font-semibold text-primary-400 uppercase tracking-widest">Technology</span>
-          <h2 className="font-orbitron text-2xl sm:text-3xl font-bold mt-3">
-            Built With Modern{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-cyan-400">Technology</span>
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {stacks.map((s, i) => (
-            <div
-              key={i}
-              className="bg-gray-900/60 rounded-xl border border-gray-800/50 p-4 text-center group hover:border-gray-700/60 transition-all duration-300 animate-fade-in-up"
-              style={{ animationDelay: `${i * 0.05}s` }}
-            >
-              <div className={`text-sm font-orbitron font-bold ${s.color} mb-1`}>{s.name}</div>
-              <div className="text-[10px] text-gray-500">{s.desc}</div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
