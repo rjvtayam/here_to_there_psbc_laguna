@@ -383,7 +383,7 @@ function FeaturesSection() {
               Campus Communication
             </span>
           </h2>
-          <p className="text-gray-400 max-w-xl mx-auto text-sm">
+          <p className="text-gray-400 max-w-xl mx-auto text-sm mb-8">
             Built specifically for PSBC Paete and PSBC Pagsanjan.
           </p>
         </div>
