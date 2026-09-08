@@ -303,70 +303,79 @@ function StatsSection() {
 function FeaturesSection() {
   const features = [
     {
-      icon: <Video size={22} />,
-      title: 'Live Video Communication',
-      desc: 'Crystal-clear two-way video between campuses using WebRTC peer-to-peer technology with sub-100ms latency.',
-      color: 'from-blue-500 to-primary-500',
+      icon: <Video size={20} />,
+      title: 'Live Video',
+      desc: 'Crystal-clear two-way video using WebRTC peer-to-peer with sub-100ms latency.',
+      gradient: 'from-blue-500 to-primary-500',
+      neon: '#3b82f6',
     },
     {
-      icon: <ScreenShare size={22} />,
+      icon: <ScreenShare size={20} />,
       title: 'Screen Sharing',
-      desc: 'Share presentations, documents, and announcements in real time. Google Meet-style layout with presenter spotlight.',
-      color: 'from-purple-500 to-pink-500',
+      desc: 'Present docs and announcements. Google Meet-style spotlight layout.',
+      gradient: 'from-purple-500 to-pink-500',
+      neon: '#a855f7',
     },
     {
-      icon: <Mic size={22} />,
+      icon: <Mic size={20} />,
       title: 'Selective Audio',
-      desc: 'Talk to Paete, Pagsanjan, or both campuses at once. Teachers, staff, and principals all have independent audio controls.',
-      color: 'from-cyan-500 to-blue-500',
+      desc: 'Talk to Paete, Pagsanjan, or both. Independent audio controls for all.',
+      gradient: 'from-cyan-500 to-blue-500',
+      neon: '#06b6d4',
     },
     {
-      icon: <MessageSquare size={22} />,
-      title: 'In-Call Text Chat',
-      desc: 'Real-time text messaging with campus-specific or broadcast channels. Send to all users or filter by campus.',
-      color: 'from-indigo-500 to-blue-500',
+      icon: <MessageSquare size={20} />,
+      title: 'Text Chat',
+      desc: 'Real-time messaging with All or Campus-specific channels.',
+      gradient: 'from-indigo-500 to-blue-500',
+      neon: '#6366f1',
     },
     {
-      icon: <Bell size={22} />,
-      title: 'Emergency Broadcast',
-      desc: 'Instantly override all campus screens with red emergency alerts. Scoped to campus or broadcast to all depending on mode.',
-      color: 'from-red-500 to-orange-500',
+      icon: <Bell size={20} />,
+      title: 'Emergency',
+      desc: 'Override all screens instantly. Campus-scoped or broadcast.',
+      gradient: 'from-red-500 to-orange-500',
+      neon: '#ef4444',
     },
     {
-      icon: <CircleDot size={22} />,
-      title: 'Portal & Meeting Modes',
-      desc: 'Three modes: LIVE (cross-campus), PORTAL (always-on campus presence), and IN MEETING (restricted private session).',
-      color: 'from-green-500 to-emerald-500',
+      icon: <CircleDot size={20} />,
+      title: 'Portal Modes',
+      desc: 'LIVE, PORTAL, or IN MEETING — toggle connectivity modes.',
+      gradient: 'from-green-500 to-emerald-500',
+      neon: '#22c55e',
     },
     {
-      icon: <KeyRound size={22} />,
-      title: 'Two-Factor Authentication',
-      desc: 'TOTP-based 2FA with QR code setup. Account lockout protection, bcrypt hashing, and JWT session management.',
-      color: 'from-amber-500 to-yellow-500',
+      icon: <KeyRound size={20} />,
+      title: '2FA Security',
+      desc: 'TOTP-based two-factor auth with QR code setup.',
+      gradient: 'from-amber-500 to-yellow-500',
+      neon: '#f59e0b',
     },
     {
-      icon: <Users size={22} />,
-      title: 'Role-Based Access Control',
-      desc: 'Four roles: Admin, Principal, Teacher, Staff. Principals create staff only; admins manage all. Campus-locked permissions.',
-      color: 'from-rose-500 to-pink-500',
+      icon: <Users size={20} />,
+      title: 'Role Access',
+      desc: 'Admin, Principal, Teacher, Staff — campus-locked permissions.',
+      gradient: 'from-rose-500 to-pink-500',
+      neon: '#f43f5e',
     },
     {
-      icon: <Settings size={22} />,
-      title: 'Device & Audio Settings',
-      desc: 'Camera/mic selection, HD video toggle, echo cancellation, noise suppression, live mic level testing, and volume control.',
-      color: 'from-teal-500 to-cyan-500',
+      icon: <Settings size={20} />,
+      title: 'Device Settings',
+      desc: 'Camera/mic selection, HD video, echo cancellation, volume control.',
+      gradient: 'from-teal-500 to-cyan-500',
+      neon: '#14b8a6',
     },
   ];
 
   const count = features.length;
   const angleStep = 360 / count;
-  const radius = 460;
+  const radius = 380;
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-20 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary-500/5 rounded-full blur-[120px]" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <span className="text-xs font-semibold text-primary-400 uppercase tracking-widest">Features</span>
           <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">
             Everything You Need for{' '}
@@ -374,28 +383,71 @@ function FeaturesSection() {
               Campus Communication
             </span>
           </h2>
-          <p className="text-gray-400 max-w-xl mx-auto">
-            Built specifically for PSBC Paete and PSBC Pagsanjan to bridge the physical gap with real-time digital presence.
+          <p className="text-gray-400 max-w-xl mx-auto text-sm">
+            Built specifically for PSBC Paete and PSBC Pagsanjan.
           </p>
         </div>
 
         {/* 3D Carousel */}
-        <div className="carousel-wrapper relative flex justify-center items-center" style={{ height: '420px', perspective: '1200px' }}>
-          <div className="carousel-track relative w-[280px] h-[320px]" style={{ transformStyle: 'preserve-3d', animation: 'carousel-spin 30s linear infinite' }}>
+        <div className="carousel-wrapper relative flex justify-center items-center" style={{ height: '340px', perspective: '1000px' }}>
+          <div className="carousel-track relative w-[220px] h-[260px]" style={{ transformStyle: 'preserve-3d', animation: 'carousel-spin 28s linear infinite' }}>
             {features.map((f, i) => (
               <div
                 key={i}
-                className="carousel-card absolute top-0 left-0 w-[280px] h-[320px]"
+                className="carousel-card absolute top-0 left-0 w-[220px] h-[260px]"
                 style={{
                   transform: `rotateY(${i * angleStep}deg) translateZ(${radius}px)`,
                 }}
               >
-                <div className="relative bg-gray-900/90 backdrop-blur-sm rounded-2xl border border-gray-800/60 p-6 h-full flex flex-col justify-center items-center text-center hover:border-gray-700/80 transition-all duration-300 group">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <div
+                  className="relative rounded-2xl p-5 h-full flex flex-col justify-center items-center text-center transition-all duration-300 group"
+                  style={{
+                    background: 'rgba(17,24,39,0.92)',
+                    backdropFilter: 'blur(12px)',
+                    border: `1px solid ${f.neon}22`,
+                    boxShadow: `0 0 20px ${f.neon}15, inset 0 1px 0 ${f.neon}10`,
+                  }}
+                >
+                  {/* Neon glow on hover */}
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ boxShadow: `0 0 30px ${f.neon}30, inset 0 0 30px ${f.neon}08` }}
+                  />
+
+                  {/* Trail accent line at top */}
+                  <div
+                    className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] rounded-full carousel-trail"
+                    style={{
+                      width: '60%',
+                      background: `linear-gradient(90deg, transparent, ${f.neon}, transparent)`,
+                      animationDelay: `${i * 0.3}s`,
+                    }}
+                  />
+
+                  {/* Icon */}
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${f.neon}40, ${f.neon}15)`,
+                      boxShadow: `0 0 15px ${f.neon}25`,
+                    }}
+                  >
                     {f.icon}
                   </div>
-                  <h3 className="font-orbitron text-sm font-bold text-white mb-3">{f.title}</h3>
-                  <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
+
+                  {/* Title */}
+                  <h3 className="font-orbitron text-xs font-bold text-white mb-1.5" style={{ textShadow: `0 0 10px ${f.neon}40` }}>
+                    {f.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-[10px] text-gray-400 leading-relaxed">{f.desc}</p>
+
+                  {/* Bottom glow dot */}
+                  <div
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full animate-pulse"
+                    style={{ background: f.neon, boxShadow: `0 0 6px ${f.neon}` }}
+                  />
                 </div>
               </div>
             ))}
