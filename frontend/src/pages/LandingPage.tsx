@@ -402,16 +402,15 @@ function FeaturesSection() {
                 <div
                   className="relative rounded-2xl p-5 h-full flex flex-col justify-center items-center text-center transition-all duration-300 group"
                   style={{
-                    background: 'rgba(17,24,39,0.92)',
-                    backdropFilter: 'blur(12px)',
-                    border: `1px solid ${f.neon}22`,
-                    boxShadow: `0 0 20px ${f.neon}15, inset 0 1px 0 ${f.neon}10`,
+                    background: 'rgba(17,24,39,0.95)',
+                    border: `2px solid ${f.neon}50`,
+                    boxShadow: `0 0 20px ${f.neon}20, inset 0 0 20px ${f.neon}05`,
                   }}
                 >
                   {/* Neon glow on hover */}
                   <div
                     className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{ boxShadow: `0 0 30px ${f.neon}30, inset 0 0 30px ${f.neon}08` }}
+                    style={{ boxShadow: `0 0 30px ${f.neon}35, inset 0 0 30px ${f.neon}10` }}
                   />
 
                   {/* Trail accent line at top */}
@@ -424,24 +423,18 @@ function FeaturesSection() {
                     }}
                   />
 
-                  {/* Icon */}
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform duration-300"
-                    style={{
-                      background: `linear-gradient(135deg, ${f.neon}40, ${f.neon}15)`,
-                      boxShadow: `0 0 15px ${f.neon}25`,
-                    }}
-                  >
+                  {/* Icon with solid gradient bg */}
+                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center text-white mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     {f.icon}
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-orbitron text-xs font-bold text-white mb-1.5" style={{ textShadow: `0 0 10px ${f.neon}40` }}>
+                  <h3 className="font-orbitron text-xs font-bold text-white mb-2" style={{ textShadow: `0 0 10px ${f.neon}40` }}>
                     {f.title}
                   </h3>
 
-                  {/* Description */}
-                  <p className="text-[10px] text-gray-400 leading-relaxed">{f.desc}</p>
+                  {/* Description with spacing */}
+                  <p className="text-[10px] text-gray-400 leading-relaxed mt-1">{f.desc}</p>
 
                   {/* Bottom glow dot */}
                   <div
