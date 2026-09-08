@@ -400,76 +400,91 @@ function FeaturesSection() {
                 }}
               >
                 <div
-                  className="relative rounded-2xl p-5 h-full flex flex-col justify-center items-center text-center transition-all duration-300 group overflow-hidden"
+                  className="relative rounded-2xl h-full flex flex-col text-center transition-all duration-300 group overflow-hidden"
                   style={{
-                    background: 'linear-gradient(180deg, rgba(17,24,39,0.98) 0%, rgba(10,15,25,0.98) 100%)',
-                    border: `2px solid ${f.neon}50`,
+                    background: 'linear-gradient(160deg, rgba(20,27,45,0.97) 0%, rgba(10,15,25,0.99) 100%)',
+                    border: `1.5px solid ${f.neon}35`,
                     boxShadow: `
-                      0 0 20px ${f.neon}20,
-                      0 8px 32px rgba(0,0,0,0.6),
-                      inset 0 1px 0 ${f.neon}15,
-                      inset 0 -1px 0 rgba(0,0,0,0.3)
+                      0 0 25px ${f.neon}15,
+                      0 12px 40px rgba(0,0,0,0.7),
+                      inset 0 1px 0 rgba(255,255,255,0.04)
                     `,
                   }}
                 >
-                  {/* Top edge glow — solid neon line */}
+                  {/* Subtle grid texture */}
                   <div
-                    className="absolute top-0 left-0 right-0 h-[2px]"
-                    style={{ background: `linear-gradient(90deg, transparent 5%, ${f.neon} 30%, ${f.neon} 70%, transparent 95%)` }}
-                  />
-
-                  {/* Bottom edge glow */}
-                  <div
-                    className="absolute bottom-0 left-0 right-0 h-[2px]"
-                    style={{ background: `linear-gradient(90deg, transparent 5%, ${f.neon}60 30%, ${f.neon}60 70%, transparent 95%)` }}
-                  />
-
-                  {/* Left edge glow */}
-                  <div
-                    className="absolute top-0 left-0 bottom-0 w-[2px]"
-                    style={{ background: `linear-gradient(180deg, transparent 5%, ${f.neon}60 30%, ${f.neon}60 70%, transparent 95%)` }}
-                  />
-
-                  {/* Right edge glow */}
-                  <div
-                    className="absolute top-0 right-0 bottom-0 w-[2px]"
-                    style={{ background: `linear-gradient(180deg, transparent 5%, ${f.neon}60 30%, ${f.neon}60 70%, transparent 95%)` }}
-                  />
-
-                  {/* Hover glow overlay */}
-                  <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{ boxShadow: `inset 0 0 40px ${f.neon}12, 0 0 40px ${f.neon}20` }}
-                  />
-
-                  {/* Top trail accent */}
-                  <div
-                    className="absolute top-[2px] left-1/2 -translate-x-1/2 h-[1px] rounded-full carousel-trail"
+                    className="absolute inset-0 opacity-[0.03] pointer-events-none"
                     style={{
-                      width: '50%',
-                      background: `linear-gradient(90deg, transparent, ${f.neon}, transparent)`,
-                      animationDelay: `${i * 0.3}s`,
+                      backgroundImage: `linear-gradient(${f.neon}30 1px, transparent 1px), linear-gradient(90deg, ${f.neon}30 1px, transparent 1px)`,
+                      backgroundSize: '20px 20px',
                     }}
                   />
 
-                  {/* Icon */}
-                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center text-white mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    {f.icon}
+                  {/* Corner accents — top-left & bottom-right */}
+                  <div className="absolute top-0 left-0 w-6 h-6 border-t-[1.5px] border-l-[1.5px] rounded-tl-2xl pointer-events-none" style={{ borderColor: `${f.neon}60` }} />
+                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-[1.5px] border-r-[1.5px] rounded-br-2xl pointer-events-none" style={{ borderColor: `${f.neon}40` }} />
+
+                  {/* Top edge neon line */}
+                  <div className="absolute top-0 left-0 right-0 h-[1.5px]" style={{ background: `linear-gradient(90deg, transparent, ${f.neon}80, transparent)` }} />
+
+                  {/* Bottom edge neon line */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[1px]" style={{ background: `linear-gradient(90deg, transparent, ${f.neon}40, transparent)` }} />
+
+                  {/* Animated shine sweep on hover */}
+                  <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                    <div
+                      className="absolute -top-full -left-full w-[200%] h-[200%] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                      style={{
+                        background: `linear-gradient(135deg, transparent 30%, ${f.neon}08 45%, ${f.neon}15 50%, ${f.neon}08 55%, transparent 70%)`,
+                        animation: 'none',
+                      }}
+                    />
                   </div>
 
-                  {/* Title */}
-                  <h3 className="font-orbitron text-xs font-bold text-white mb-2" style={{ textShadow: `0 0 10px ${f.neon}40` }}>
-                    {f.title}
-                  </h3>
+                  {/* Number badge */}
+                  <div className="absolute top-3 right-3">
+                    <span
+                      className="text-[9px] font-orbitron font-bold px-1.5 py-0.5 rounded-md"
+                      style={{
+                        background: `${f.neon}15`,
+                        color: `${f.neon}`,
+                        border: `1px solid ${f.neon}25`,
+                      }}
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                  </div>
 
-                  {/* Description */}
-                  <p className="text-[10px] text-gray-400 leading-relaxed mt-1">{f.desc}</p>
+                  {/* Icon container with glass bg */}
+                  <div className="flex-1 flex flex-col items-center justify-center px-4 pt-3 pb-1">
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300 relative"
+                      style={{
+                        background: `linear-gradient(135deg, ${f.neon}30, ${f.neon}10)`,
+                        border: `1px solid ${f.neon}25`,
+                        boxShadow: `0 0 20px ${f.neon}20, 0 4px 12px rgba(0,0,0,0.3)`,
+                      }}
+                    >
+                      {/* Inner glow ring */}
+                      <div
+                        className="absolute inset-0 rounded-2xl opacity-40"
+                        style={{ boxShadow: `inset 0 0 12px ${f.neon}25` }}
+                      />
+                      <span className="relative z-10">{f.icon}</span>
+                    </div>
 
-                  {/* Bottom glow dot */}
-                  <div
-                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full animate-pulse"
-                    style={{ background: f.neon, boxShadow: `0 0 6px ${f.neon}` }}
-                  />
+                    {/* Title with neon underline */}
+                    <h3 className="font-orbitron text-[11px] font-bold text-white mb-1.5 tracking-wide">
+                      {f.title}
+                    </h3>
+                    <div className="w-8 h-[1px] rounded-full mb-2.5" style={{ background: `linear-gradient(90deg, transparent, ${f.neon}60, transparent)` }} />
+
+                    {/* Description */}
+                    <p className="text-[10px] text-gray-400 leading-relaxed">{f.desc}</p>
+                  </div>
+
+                  {/* Bottom accent bar */}
+                  <div className="h-[2px] w-full mt-auto" style={{ background: `linear-gradient(90deg, transparent, ${f.neon}30, transparent)` }} />
                 </div>
               </div>
             ))}
