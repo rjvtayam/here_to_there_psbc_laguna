@@ -166,50 +166,94 @@ function HeroSection({ onGetStarted, onWatchDemo }: { onGetStarted: () => void; 
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
                 </div>
-                  <div className="flex-1 flex justify-center">
+                <div className="flex-1 flex justify-center">
                   <div className="bg-gray-700/50 rounded-md px-4 py-1 text-xs text-gray-400">PSBC Control Room</div>
                 </div>
               </div>
               {/* Mockup content */}
-              <div className="grid grid-cols-2 gap-3 p-4">
-                <div className="bg-gray-800 rounded-lg aspect-video relative overflow-hidden border border-gray-700/50 group">
-                  <img src="/images/paete.png" alt="PSBC Paete" className="w-full h-full object-cover opacity-40" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-gray-900/30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Monitor size={18} className="text-white/80" />
+              <div className="p-4 flex flex-col items-center gap-0">
+                {/* Campus feeds */}
+                <div className="grid grid-cols-2 gap-3 w-full">
+                  <div className="bg-gray-800 rounded-lg aspect-video relative overflow-hidden border border-gray-700/50 group">
+                    <img src="/images/paete.png" alt="PSBC Paete" className="w-full h-full object-cover opacity-40" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-gray-900/30" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Monitor size={18} className="text-white/80" />
+                      </div>
+                    </div>
+                    <div className="absolute top-2 left-2">
+                      <span className="text-[8px] text-red-400 font-bold bg-red-500/20 px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> REC
+                      </span>
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                      <span className="text-[11px] text-white font-medium">PSBC Paete</span>
+                      <span className="text-[9px] text-green-400 font-medium bg-green-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> LIVE
+                      </span>
                     </div>
                   </div>
-                  <div className="absolute top-2 left-2">
-                    <span className="text-[8px] text-red-400 font-bold bg-red-500/20 px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> REC
-                    </span>
-                  </div>
-                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                    <span className="text-[11px] text-white font-medium">PSBC Paete</span>
-                    <span className="text-[9px] text-green-400 font-medium bg-green-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> LIVE
-                    </span>
+                  <div className="bg-gray-800 rounded-lg aspect-video relative overflow-hidden border border-gray-700/50 group">
+                    <img src="/images/pagsanjan.png" alt="PSBC Pagsanjan" className="w-full h-full object-cover opacity-40" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-gray-900/30" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Monitor size={18} className="text-white/80" />
+                      </div>
+                    </div>
+                    <div className="absolute top-2 left-2">
+                      <span className="text-[8px] text-red-400 font-bold bg-red-500/20 px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> REC
+                      </span>
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                      <span className="text-[11px] text-white font-medium">PSBC Pagsanjan</span>
+                      <span className="text-[9px] text-green-400 font-medium bg-green-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> LIVE
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="bg-gray-800 rounded-lg aspect-video relative overflow-hidden border border-gray-700/50 group">
-                  <img src="/images/pagsanjan.png" alt="PSBC Pagsanjan" className="w-full h-full object-cover opacity-40" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-gray-900/30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Monitor size={18} className="text-white/80" />
+
+                {/* Dotted neon lines connecting to admin */}
+                <div className="relative w-full h-10 flex justify-center">
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 40" preserveAspectRatio="none">
+                    {/* Left line: from Paete center to admin */}
+                    <line x1="100" y1="0" x2="200" y2="40" stroke="url(#neonGradLeft)" strokeWidth="2" strokeDasharray="6 4" className="animate-pulse" />
+                    {/* Right line: from Pagsanjan center to admin */}
+                    <line x1="300" y1="0" x2="200" y2="40" stroke="url(#neonGradRight)" strokeWidth="2" strokeDasharray="6 4" className="animate-pulse" />
+                    <defs>
+                      <linearGradient id="neonGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#a855f7" stopOpacity="0.8" />
+                      </linearGradient>
+                      <linearGradient id="neonGradRight" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#a855f7" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.8" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  {/* Glow dots at connection points */}
+                  <div className="absolute top-0 left-[25%] w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_2px_rgba(34,211,238,0.6)]" />
+                  <div className="absolute top-0 right-[25%] w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_2px_rgba(168,85,247,0.6)]" />
+                </div>
+
+                {/* Admin card */}
+                <div className="w-full max-w-[280px] bg-gray-800 rounded-lg p-3 border border-gray-700/50 relative">
+                  <div className="absolute -top-px left-1/2 -translate-x-1/2 w-12 h-[2px] bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 flex items-center justify-center">
+                      <Shield size={18} className="text-cyan-400" />
                     </div>
-                  </div>
-                  <div className="absolute top-2 left-2">
-                    <span className="text-[8px] text-red-400 font-bold bg-red-500/20 px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> REC
-                    </span>
-                  </div>
-                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                    <span className="text-[11px] text-white font-medium">PSBC Pagsanjan</span>
-                    <span className="text-[9px] text-green-400 font-medium bg-green-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> LIVE
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-white font-semibold truncate">Admin Control Room</p>
+                      <p className="text-[9px] text-gray-500">Monitoring both campuses</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      <span className="text-[8px] text-cyan-400 font-medium">ADMIN</span>
+                    </div>
                   </div>
                 </div>
               </div>
