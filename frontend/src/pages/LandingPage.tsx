@@ -725,7 +725,7 @@ function BrowserCompatSection() {
     { name: 'Edge', version: '90+', logo: '/images/edge-logo.png' },
     { name: 'Safari', version: '14+', logo: '/images/safari-logo.png' },
     { name: 'Brave', version: '90+', logo: '/images/brave-logo.png' },
-    { name: 'Browsers', version: 'Incognito', logo: null, icon: <Globe size={28} className="text-white" /> },
+    { name: 'Browsers', version: 'Incognito', logo: '/images/incognito-logo.png' },
   ];
 
   const devices = [
@@ -758,12 +758,8 @@ function BrowserCompatSection() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {browsers.map((b, i) => (
                 <div key={i} className="flex items-center gap-3 bg-gray-900/60 rounded-xl border border-gray-800/50 p-4 group hover:border-gray-700/60 transition-all">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
-                    {b.logo ? (
-                      <img src={b.logo} alt={`${b.name} logo`} className="w-full h-full object-contain" />
-                    ) : (
-                      b.icon
-                    )}
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+                    <img src={b.logo} alt={`${b.name} logo`} className="w-full h-full object-contain" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">{b.name}</p>
