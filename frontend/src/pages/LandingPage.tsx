@@ -720,11 +720,12 @@ function SecuritySection() {
 /* ─── BROWSER COMPATIBILITY + SYSTEM REQUIREMENTS ─── */
 function BrowserCompatSection() {
   const browsers = [
-    { name: 'Chrome', version: '90+', logo: '/images/chrome-logo.png', color: 'from-red-500 via-yellow-500 to-green-500' },
-    { name: 'Firefox', version: '88+', logo: '/images/firefox-logo.png', color: 'from-orange-500 via-red-500 to-purple-500' },
-    { name: 'Edge', version: '90+', logo: '/images/edge-logo.png', color: 'from-blue-500 via-cyan-500 to-blue-600' },
-    { name: 'Safari', version: '14+', logo: '/images/safari-logo.png', color: 'from-blue-400 via-blue-500 to-blue-600' },
-    { name: 'Brave', version: '90+', logo: '/images/brave-logo.png', color: 'from-orange-500 via-red-500 to-pink-500' },
+    { name: 'Chrome', version: '90+', logo: '/images/chrome-logo.png' },
+    { name: 'Firefox', version: '88+', logo: '/images/firefox-logo.png' },
+    { name: 'Edge', version: '90+', logo: '/images/edge-logo.png' },
+    { name: 'Safari', version: '14+', logo: '/images/safari-logo.png' },
+    { name: 'Brave', version: '90+', logo: '/images/brave-logo.png' },
+    { name: 'All Browsers', version: 'InPrivate / Incognito', logo: null, icon: <Globe size={22} className="text-white" /> },
   ];
 
   const devices = [
@@ -757,8 +758,12 @@ function BrowserCompatSection() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {browsers.map((b, i) => (
                 <div key={i} className="flex items-center gap-3 bg-gray-900/60 rounded-xl border border-gray-800/50 p-4 group hover:border-gray-700/60 transition-all">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br p-1 flex items-center justify-center" style={{background: 'transparent'}}>
-                    <img src={b.logo} alt={`${b.name} logo`} className="w-full h-full object-contain" />
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
+                    {b.logo ? (
+                      <img src={b.logo} alt={`${b.name} logo`} className="w-full h-full object-contain" />
+                    ) : (
+                      b.icon
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">{b.name}</p>
