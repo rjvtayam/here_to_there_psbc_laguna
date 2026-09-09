@@ -5,7 +5,8 @@ import {
   ScreenShare, Bell, Globe, Zap, Sparkles, ArrowRight, Clock, Radio, Signal,
   MessageSquare, CircleDot, Users, KeyRound, FileText, Settings,
   Headphones, CheckCircle2,
-  Lock, Eye, Fingerprint, Mail, MapPin, Phone
+  Lock, Eye, Fingerprint, Mail, MapPin, Phone,
+  Smartphone, Tablet
 } from 'lucide-react';
 import { DemoTour } from '../components/demo/DemoTour';
 
@@ -718,72 +719,18 @@ function SecuritySection() {
 
 /* ─── BROWSER COMPATIBILITY + SYSTEM REQUIREMENTS ─── */
 function BrowserCompatSection() {
-  const ChromeLogo = () => (
-    <svg viewBox="0 0 48 48" className="w-5 h-5" fill="none">
-      <circle cx="24" cy="24" r="22" fill="#fff"/>
-      <path d="M24 14.4A9.6 9.6 0 0 1 32.76 19.2H24v4.8h11.04A11.04 11.04 0 0 1 24 35.04a11.04 11.04 0 0 1-9.84-6.08l-4.2 7.28A21.96 21.96 0 0 0 24 46a21.6 21.6 0 0 0 21.6-21.6A21.6 21.6 0 0 0 24 2.4a21.72 21.72 0 0 0-9.12 2l4.56 7.92A9.56 9.56 0 0 1 24 14.4z" fill="#EA4335"/>
-      <path d="M9.6 14.4a21.96 21.96 0 0 0 3.84 18.64l4.2-7.28A9.56 9.56 0 0 1 14.4 24a9.6 9.6 0 0 1 .84-4.08L9.6 14.4z" fill="#FBBC05"/>
-      <path d="M24 35.04a9.6 9.6 0 0 1-6.24-2.28l-4.2 7.28A21.6 21.6 0 0 0 24 46a21.72 21.72 0 0 0 14.4-5.52l-3.84-6.72A9.56 9.56 0 0 1 24 35.04z" fill="#34A853"/>
-      <path d="M45.6 24a21.6 21.6 0 0 0-.96-6H24v4.8h11.04a11.16 11.16 0 0 1-1.08 3.84l3.84 6.72A21.6 21.6 0 0 0 45.6 24z" fill="#4285F4"/>
-      <circle cx="24" cy="24" r="8" fill="#fff"/>
-      <circle cx="24" cy="24" r="4.8" fill="#4285F4"/>
-    </svg>
-  );
-
-  const FirefoxLogo = () => (
-    <svg viewBox="0 0 48 48" className="w-5 h-5" fill="none">
-      <defs>
-        <linearGradient id="ff1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FF980E"/>
-          <stop offset="100%" stopColor="#FF3750"/>
-        </linearGradient>
-      </defs>
-      <circle cx="24" cy="24" r="22" fill="url(#ff1)"/>
-      <path d="M24 6C14.06 6 6 14.06 6 24s8.06 18 18 18c3.1 0 6.04-.78 8.6-2.16-2.48-3.2-4.6-7.04-4.6-12.84 0-.48.02-.96.06-1.44H24v-6h14.04c.48 2.16.96 5.04.96 8.04 0 8.28-5.04 15.24-12.24 18.12A17.94 17.94 0 0 1 6 24C6 14.06 14.06 6 24 6z" fill="#FFBD4F" opacity="0.6"/>
-      <path d="M24 12c5.52 0 10.56 2.4 14.04 6.24C34.68 14.4 29.64 12 24 12c-3.12 0-6 .72-8.52 2.04C18 12.84 20.88 12 24 12z" fill="#FF980E"/>
-      <circle cx="24" cy="24" r="6" fill="#fff" opacity="0.9"/>
-      <circle cx="24" cy="24" r="3.6" fill="#3B82F6"/>
-    </svg>
-  );
-
-  const EdgeLogo = () => (
-    <svg viewBox="0 0 48 48" className="w-5 h-5" fill="none">
-      <circle cx="24" cy="24" r="22" fill="#fff"/>
-      <path d="M24 6C14.06 6 6 14.06 6 24c0 4.88 1.92 9.32 5.04 12.56C14.68 34.16 19.12 36 24 36c3.52 0 6.76-1.04 9.48-2.84L36 24H24v-4.8h16.8c.72-2.16 1.2-4.56 1.2-7.2C42 8.04 33.96 6 24 6z" fill="#0078D7"/>
-      <path d="M12 36.56C15.32 40.2 19.44 42 24 42c9.94 0 18-8.06 18-18 0-3.12-.78-6.08-2.16-8.64H24v14.4h10.56c-1.44 3.84-4.56 7.08-8.4 8.8A17.88 17.88 0 0 1 12 36.56z" fill="#0078D7" opacity="0.5"/>
-      <circle cx="24" cy="24" r="6" fill="#fff"/>
-      <path d="M21 21h6v2h-6zm1 3h4v2h-4z" fill="#0078D7"/>
-    </svg>
-  );
-
-  const SafariLogo = () => (
-    <svg viewBox="0 0 48 48" className="w-5 h-5" fill="none">
-      <circle cx="24" cy="24" r="22" fill="#fff"/>
-      <defs>
-        <linearGradient id="sf1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#5AC8FA"/>
-          <stop offset="100%" stopColor="#007AFF"/>
-        </linearGradient>
-      </defs>
-      <circle cx="24" cy="24" r="18" fill="url(#sf1)"/>
-      <circle cx="24" cy="24" r="15" fill="#fff" opacity="0.15"/>
-      {/* Compass needle */}
-      <polygon points="24,8 27,24 24,26 21,24" fill="#fff"/>
-      <polygon points="24,40 21,24 24,22 27,24" fill="#FF3B30" opacity="0.9"/>
-      <circle cx="24" cy="24" r="2" fill="#fff"/>
-      {/* Tick marks */}
-      <line x1="24" y1="9" x2="24" y2="11" stroke="#fff" strokeWidth="1" opacity="0.6"/>
-      <line x1="24" y1="37" x2="24" y2="39" stroke="#fff" strokeWidth="1" opacity="0.6"/>
-      <line x1="9" y1="24" x2="11" y2="24" stroke="#fff" strokeWidth="1" opacity="0.6"/>
-      <line x1="37" y1="24" x2="39" y2="24" stroke="#fff" strokeWidth="1" opacity="0.6"/>
-    </svg>
-  );
-
   const browsers = [
-    { name: 'Chrome', version: '90+', gradient: 'from-red-500 via-yellow-500 to-green-500', logo: <ChromeLogo /> },
-    { name: 'Firefox', version: '88+', gradient: 'from-orange-500 via-red-500 to-purple-500', logo: <FirefoxLogo /> },
-    { name: 'Edge', version: '90+', gradient: 'from-blue-500 via-cyan-500 to-blue-600', logo: <EdgeLogo /> },
-    { name: 'Safari', version: '14+', gradient: 'from-blue-400 via-blue-500 to-blue-600', logo: <SafariLogo /> },
+    { name: 'Chrome', version: '90+', logo: '/images/chrome-logo.png', color: 'from-red-500 via-yellow-500 to-green-500' },
+    { name: 'Firefox', version: '88+', logo: '/images/firefox-logo.png', color: 'from-orange-500 via-red-500 to-purple-500' },
+    { name: 'Edge', version: '90+', logo: '/images/edge-logo.png', color: 'from-blue-500 via-cyan-500 to-blue-600' },
+    { name: 'Safari', version: '14+', logo: '/images/safari-logo.png', color: 'from-blue-400 via-blue-500 to-blue-600' },
+    { name: 'Brave', version: '90+', logo: '/images/brave-logo.png', color: 'from-orange-500 via-red-500 to-pink-500' },
+  ];
+
+  const devices = [
+    { icon: <Smartphone size={20} />, label: 'Mobile', desc: 'iOS & Android phones', gradient: 'from-green-400 to-emerald-500' },
+    { icon: <Tablet size={20} />, label: 'Tablet', desc: 'iPad & Android tablets', gradient: 'from-blue-400 to-cyan-500' },
+    { icon: <Monitor size={20} />, label: 'Desktop', desc: 'Windows, Mac & Linux', gradient: 'from-purple-400 to-pink-500' },
   ];
 
   const requirements = [
@@ -807,11 +754,11 @@ function BrowserCompatSection() {
             <p className="text-gray-400 text-sm mb-8 leading-relaxed">
               No downloads. No plugins. Just open your browser and connect. Here to There runs entirely in the web.
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {browsers.map((b, i) => (
                 <div key={i} className="flex items-center gap-3 bg-gray-900/60 rounded-xl border border-gray-800/50 p-4 group hover:border-gray-700/60 transition-all">
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${b.gradient} flex items-center justify-center`}>
-                    {b.logo}
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br p-1 flex items-center justify-center" style={{background: 'transparent'}}>
+                    <img src={b.logo} alt={`${b.name} logo`} className="w-full h-full object-contain" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">{b.name}</p>
@@ -820,6 +767,30 @@ function BrowserCompatSection() {
                   <CheckCircle2 size={16} className="text-green-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               ))}
+            </div>
+
+            {/* Responsive / Multi-device badge */}
+            <div className="mt-6 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-cyan-500/10 rounded-xl border border-green-500/20 p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                  <Smartphone size={16} className="text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-green-400">Fully Responsive</p>
+                  <p className="text-[10px] text-gray-500">Adapts to any screen size</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {devices.map((d, i) => (
+                  <div key={i} className="text-center">
+                    <div className={`w-8 h-8 mx-auto rounded-lg bg-gradient-to-br ${d.gradient} flex items-center justify-center mb-1.5`}>
+                      {d.icon}
+                    </div>
+                    <p className="text-[10px] font-semibold text-white">{d.label}</p>
+                    <p className="text-[9px] text-gray-500">{d.desc}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -839,7 +810,7 @@ function BrowserCompatSection() {
                   <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
                     {r.icon}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm font-semibold text-white">{r.label}</p>
                     <p className="text-[11px] text-gray-500">{r.desc}</p>
                   </div>
