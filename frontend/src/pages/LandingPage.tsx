@@ -725,7 +725,7 @@ function BrowserCompatSection() {
     { name: 'Edge', version: '90+', logo: '/images/edge-logo.png' },
     { name: 'Safari', version: '14+', logo: '/images/safari-logo.png' },
     { name: 'Brave', version: '90+', logo: '/images/brave-logo.png' },
-    { name: 'Browsers', version: 'Private / Incognito', logo: null, icon: <Globe size={22} className="text-white" /> },
+    { name: 'Browsers', version: 'Incognito', logo: null, icon: <Globe size={28} className="text-white" /> },
   ];
 
   const devices = [
