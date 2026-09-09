@@ -1517,7 +1517,7 @@ function CTASection({ onGetStarted }: { onGetStarted: () => void }) {
                 <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-400 to-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity" />
                 <span className="relative flex items-center gap-2">
                   <Radio size={18} />
-                  Get Started
+                  Launch Portal
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
