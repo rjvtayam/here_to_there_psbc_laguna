@@ -1132,16 +1132,15 @@ function MapSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
           <span className="text-xs font-semibold text-cyan-400 uppercase tracking-widest">Location</span>
-          <h2 className="font-orbitron font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">Laguna, Philippines</h2>
+          <h2 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold mt-3 mb-4">Laguna, Philippines</h2>
           <p className="text-gray-400 max-w-lg mx-auto">
             PSBC Paete and PSBC Pagsanjan are located in the province of Laguna, connected through this portal.
           </p>
         </div>
 
         <div className="relative rounded-2xl overflow-hidden border border-gray-800/60 bg-gray-900/80">
-          {/* Map SVG — Laguna Province with Paete & Pagsanjan markers */}
+          {/* Map SVG */}
           <svg viewBox="0 0 800 600" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
-            {/* Water / Laguna de Bay */}
             <defs>
               <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#0c4a6e" stopOpacity="0.4" />
@@ -1150,6 +1149,19 @@ function MapSection() {
               <linearGradient id="landGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#1f2937" stopOpacity="0.8" />
                 <stop offset="100%" stopColor="#111827" stopOpacity="0.9" />
+              </linearGradient>
+              <linearGradient id="connGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="50%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#06b6d4" />
+              </linearGradient>
+              <linearGradient id="paeteGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#1e40af" />
+              </linearGradient>
+              <linearGradient id="pagsanjanGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#06b6d4" />
+                <stop offset="100%" stopColor="#0e7490" />
               </linearGradient>
               <filter id="glow">
                 <feGaussianBlur stdDeviation="4" result="blur" />
@@ -1165,9 +1177,16 @@ function MapSection() {
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+              <filter id="glowPulse">
+                <feGaussianBlur stdDeviation="12" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
 
-            {/* Laguna de Bay (lake) */}
+            {/* Laguna de Bay */}
             <path
               d="M300,580 C250,540 200,480 220,420 C240,360 300,320 360,300 C420,280 480,300 520,340 C560,380 580,440 560,500 C540,540 480,570 420,585 Z"
               fill="url(#waterGrad)"
@@ -1175,11 +1194,14 @@ function MapSection() {
               strokeWidth="1"
               strokeOpacity="0.3"
             />
+            {/* Lake wave lines */}
+            <path d="M340,520 Q380,510 420,520 Q460,530 500,520" stroke="#0e7490" strokeWidth="0.5" fill="none" opacity="0.3" />
+            <path d="M320,550 Q370,540 420,550 Q470,560 510,545" stroke="#0e7490" strokeWidth="0.5" fill="none" opacity="0.2" />
             <text x="380" y="450" fill="#0e7490" opacity="0.4" fontSize="14" fontFamily="Inter" textAnchor="middle" fontStyle="italic">
               Laguna de Bay
             </text>
 
-            {/* Land mass — Laguna province */}
+            {/* Land mass */}
             <path
               d="M100,80 C160,60 250,50 350,70 C450,90 550,80 650,100 C720,115 760,140 770,180 C780,230 760,300 720,360 C680,420 620,470 550,500 C480,530 400,540 340,520 C280,500 220,460 180,400 C140,340 100,260 90,200 C82,140 85,100 100,80 Z"
               fill="url(#landGrad)"
@@ -1187,93 +1209,256 @@ function MapSection() {
               strokeWidth="1.5"
             />
 
-            {/* Road connections */}
-            <path d="M260,280 C280,310 290,340 300,370" stroke="#4b5563" strokeWidth="1.5" strokeDasharray="6 4" fill="none" opacity="0.5" />
-            <path d="M260,280 C300,260 350,250 400,260" stroke="#4b5563" strokeWidth="1.5" strokeDasharray="6 4" fill="none" opacity="0.5" />
-            <path d="M400,260 C420,290 430,320 430,350" stroke="#4b5563" strokeWidth="1.5" strokeDasharray="6 4" fill="none" opacity="0.5" />
+            {/* Road network */}
+            <path d="M260,280 C280,310 290,340 300,370" stroke="#4b5563" strokeWidth="1" strokeDasharray="4 3" fill="none" opacity="0.4" />
+            <path d="M260,280 C300,260 350,250 400,260" stroke="#4b5563" strokeWidth="1" strokeDasharray="4 3" fill="none" opacity="0.4" />
+            <path d="M400,260 C420,290 430,320 430,350" stroke="#4b5563" strokeWidth="1" strokeDasharray="4 3" fill="none" opacity="0.4" />
+            <path d="M160,160 C200,200 230,240 260,280" stroke="#4b5563" strokeWidth="1" strokeDasharray="4 3" fill="none" opacity="0.3" />
+            <path d="M520,180 C490,210 460,240 430,260" stroke="#4b5563" strokeWidth="1" strokeDasharray="4 3" fill="none" opacity="0.3" />
 
-            {/* Connection line between campuses */}
+            {/* ═══ Animated connection arc between campuses ═══ */}
             <path
-              d="M260,280 Q340,230 430,260"
+              d="M260,280 Q340,220 430,260"
               stroke="url(#connGrad)"
-              strokeWidth="2"
+              strokeWidth="2.5"
               fill="none"
-              strokeDasharray="8 4"
-              opacity="0.6"
+              strokeDasharray="10 5"
+              opacity="0.7"
             >
-              <animate attributeName="stroke-dashoffset" from="24" to="0" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="stroke-dashoffset" from="30" to="0" dur="2s" repeatCount="indefinite" />
             </path>
-            <defs>
-              <linearGradient id="connGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#06b6d4" />
-              </linearGradient>
-            </defs>
+            {/* Glow underneath arc */}
+            <path
+              d="M260,280 Q340,220 430,260"
+              stroke="url(#connGrad)"
+              strokeWidth="6"
+              fill="none"
+              opacity="0.15"
+              filter="url(#glowLarge)"
+            />
 
-            {/* PSBC Paete marker */}
-            <g filter="url(#glowLarge)">
-              <circle cx="260" cy="280" r="20" fill="#3b82f6" opacity="0.15" />
-              <circle cx="260" cy="280" r="12" fill="#3b82f6" opacity="0.25" />
-            </g>
+            {/* ═══ Data packet animation on arc ═══ */}
+            <circle r="3" fill="#a855f7" filter="url(#glow)">
+              <animateMotion
+                path="M260,280 Q340,220 430,260"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle r="2" fill="#22d3ee" filter="url(#glow)">
+              <animateMotion
+                path="M430,260 Q340,220 260,280"
+                dur="3.5s"
+                repeatCount="indefinite"
+              />
+            </circle>
+
+            {/* ═══ PSBC PAETE ═══ */}
+            {/* Outer pulse rings */}
+            <circle cx="260" cy="280" r="28" fill="none" stroke="#3b82f6" strokeWidth="1" opacity="0.15">
+              <animate attributeName="r" from="18" to="35" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" from="0.3" to="0" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="260" cy="280" r="22" fill="none" stroke="#3b82f6" strokeWidth="0.8" opacity="0.2">
+              <animate attributeName="r" from="14" to="28" dur="2s" repeatCount="indefinite" begin="0.5s" />
+              <animate attributeName="opacity" from="0.25" to="0" dur="2s" repeatCount="indefinite" begin="0.5s" />
+            </circle>
+            {/* Glow backdrop */}
+            <circle cx="260" cy="280" r="20" fill="#3b82f6" opacity="0.12" filter="url(#glowLarge)" />
+            <circle cx="260" cy="280" r="12" fill="#3b82f6" opacity="0.2" />
+            {/* Main marker */}
             <circle cx="260" cy="280" r="6" fill="#3b82f6" stroke="#1e40af" strokeWidth="2" filter="url(#glow)" />
             <circle cx="260" cy="280" r="2.5" fill="white" />
-
-            <rect x="195" y="238" width="130" height="28" rx="6" fill="#111827" stroke="#1e40af" strokeWidth="1" opacity="0.9" />
-            <text x="260" y="256" fill="white" fontSize="10" fontFamily="Inter" fontWeight="700" textAnchor="middle">
+            {/* Building icon */}
+            <rect x="248" y="263" width="24" height="18" rx="2" fill="none" stroke="#60a5fa" strokeWidth="0.8" opacity="0.4" />
+            <rect x="252" y="267" width="4" height="4" rx="0.5" fill="#60a5fa" opacity="0.3" />
+            <rect x="258" y="267" width="4" height="4" rx="0.5" fill="#60a5fa" opacity="0.3" />
+            <rect x="264" y="267" width="4" height="4" rx="0.5" fill="#60a5fa" opacity="0.3" />
+            <rect x="252" y="273" width="4" height="4" rx="0.5" fill="#60a5fa" opacity="0.3" />
+            <rect x="258" y="273" width="4" height="8" rx="0.5" fill="#60a5fa" opacity="0.3" />
+            <rect x="264" y="273" width="4" height="4" rx="0.5" fill="#60a5fa" opacity="0.3" />
+            {/* Label */}
+            <rect x="188" y="232" width="144" height="30" rx="8" fill="#111827" stroke="#1e40af" strokeWidth="1.2" opacity="0.95" />
+            <rect x="188" y="232" width="144" height="30" rx="8" fill="url(#paeteGlow)" opacity="0.08" />
+            <circle cx="200" cy="247" r="4" fill="#3b82f6" opacity="0.8" />
+            <text x="210" y="251" fill="white" fontSize="11" fontFamily="Inter" fontWeight="700">
               PSBC PAETE
             </text>
-
-            <rect x="210" y="220" width="100" height="14" rx="4" fill="#1e40af" opacity="0.3" />
-            <text x="260" y="230" fill="#93c5fd" fontSize="7" fontFamily="Inter" textAnchor="middle">
+            {/* Live indicator */}
+            <circle cx="298" cy="247" r="3" fill="#22c55e">
+              <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite" />
+            </circle>
+            {/* Sub-label */}
+            <rect x="205" y="215" width="110" height="16" rx="4" fill="#1e40af" opacity="0.25" />
+            <text x="260" y="226" fill="#93c5fd" fontSize="7.5" fontFamily="Inter" textAnchor="middle">
               Paete, Laguna
             </text>
 
-            {/* PSBC Pagsanjan marker */}
-            <g filter="url(#glowLarge)">
-              <circle cx="430" cy="260" r="20" fill="#06b6d4" opacity="0.15" />
-              <circle cx="430" cy="260" r="12" fill="#06b6d4" opacity="0.25" />
-            </g>
+            {/* ═══ PSBC PAGSANJAN ═══ */}
+            {/* Outer pulse rings */}
+            <circle cx="430" cy="260" r="28" fill="none" stroke="#06b6d4" strokeWidth="1" opacity="0.15">
+              <animate attributeName="r" from="18" to="35" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" from="0.3" to="0" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="430" cy="260" r="22" fill="none" stroke="#06b6d4" strokeWidth="0.8" opacity="0.2">
+              <animate attributeName="r" from="14" to="28" dur="2s" repeatCount="indefinite" begin="0.5s" />
+              <animate attributeName="opacity" from="0.25" to="0" dur="2s" repeatCount="indefinite" begin="0.5s" />
+            </circle>
+            {/* Glow backdrop */}
+            <circle cx="430" cy="260" r="20" fill="#06b6d4" opacity="0.12" filter="url(#glowLarge)" />
+            <circle cx="430" cy="260" r="12" fill="#06b6d4" opacity="0.2" />
+            {/* Main marker */}
             <circle cx="430" cy="260" r="6" fill="#06b6d4" stroke="#0e7490" strokeWidth="2" filter="url(#glow)" />
             <circle cx="430" cy="260" r="2.5" fill="white" />
-
-            <rect x="355" y="218" width="150" height="28" rx="6" fill="#111827" stroke="#0e7490" strokeWidth="1" opacity="0.9" />
-            <text x="430" y="236" fill="white" fontSize="10" fontFamily="Inter" fontWeight="700" textAnchor="middle">
+            {/* Building icon */}
+            <rect x="418" y="243" width="24" height="18" rx="2" fill="none" stroke="#22d3ee" strokeWidth="0.8" opacity="0.4" />
+            <rect x="422" y="247" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.3" />
+            <rect x="428" y="247" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.3" />
+            <rect x="434" y="247" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.3" />
+            <rect x="422" y="253" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.3" />
+            <rect x="428" y="253" width="4" height="8" rx="0.5" fill="#22d3ee" opacity="0.3" />
+            <rect x="434" y="253" width="4" height="4" rx="0.5" fill="#22d3ee" opacity="0.3" />
+            {/* Label */}
+            <rect x="348" y="212" width="164" height="30" rx="8" fill="#111827" stroke="#0e7490" strokeWidth="1.2" opacity="0.95" />
+            <rect x="348" y="212" width="164" height="30" rx="8" fill="url(#pagsanjanGlow)" opacity="0.08" />
+            <circle cx="360" cy="227" r="4" fill="#06b6d4" opacity="0.8" />
+            <text x="370" y="231" fill="white" fontSize="11" fontFamily="Inter" fontWeight="700">
               PSBC PAGSANJAN
             </text>
-
-            <rect x="370" y="200" width="120" height="14" rx="4" fill="#0e7490" opacity="0.3" />
-            <text x="430" y="210" fill="#67e8f9" fontSize="7" fontFamily="Inter" textAnchor="middle">
+            {/* Live indicator */}
+            <circle cx="490" cy="227" r="3" fill="#22c55e">
+              <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite" />
+            </circle>
+            {/* Sub-label */}
+            <rect x="365" y="195" width="130" height="16" rx="4" fill="#0e7490" opacity="0.25" />
+            <text x="430" y="206" fill="#67e8f9" fontSize="7.5" fontFamily="Inter" textAnchor="middle">
               Pagsanjan, Laguna
             </text>
 
-            {/* Nearby city labels */}
-            <text x="160" y="160" fill="#6b7280" fontSize="9" fontFamily="Inter" textAnchor="middle">Sta. Cruz</text>
-            <text x="520" y="180" fill="#6b7280" fontSize="9" fontFamily="Inter" textAnchor="middle">Lumban</text>
-            <text x="600" y="240" fill="#6b7280" fontSize="9" fontFamily="Inter" textAnchor="middle">Pila</text>
-            <text x="200" y="370" fill="#6b7280" fontSize="9" fontFamily="Inter" textAnchor="middle">Santa Maria</text>
-            <text x="550" y="360" fill="#6b7280" fontSize="9" fontFamily="Inter" textAnchor="middle">Victoria</text>
-            <text x="350" y="140" fill="#6b7280" fontSize="9" fontFamily="Inter" textAnchor="middle">Calauan</text>
-            <text x="470" y="150" fill="#6b7280" fontSize="9" fontFamily="Inter" textAnchor="middle">Pangil</text>
+            {/* ═══ Nearby city icons + labels ═══ */}
+            {/* Sta. Cruz */}
+            <circle cx="160" cy="160" r="3" fill="#6b7280" opacity="0.5" />
+            <circle cx="160" cy="160" r="1.5" fill="#9ca3af" />
+            <text x="160" y="152" fill="#6b7280" fontSize="8" fontFamily="Inter" textAnchor="middle">Sta. Cruz</text>
+
+            {/* Calauan */}
+            <circle cx="350" cy="140" r="3" fill="#6b7280" opacity="0.5" />
+            <circle cx="350" cy="140" r="1.5" fill="#9ca3af" />
+            <text x="350" y="132" fill="#6b7280" fontSize="8" fontFamily="Inter" textAnchor="middle">Calauan</text>
+
+            {/* Pangil */}
+            <circle cx="470" cy="150" r="3" fill="#6b7280" opacity="0.5" />
+            <circle cx="470" cy="150" r="1.5" fill="#9ca3af" />
+            <text x="470" y="142" fill="#6b7280" fontSize="8" fontFamily="Inter" textAnchor="middle">Pangil</text>
+
+            {/* Lumban */}
+            <circle cx="520" cy="180" r="3" fill="#6b7280" opacity="0.5" />
+            <circle cx="520" cy="180" r="1.5" fill="#9ca3af" />
+            <text x="520" y="172" fill="#6b7280" fontSize="8" fontFamily="Inter" textAnchor="middle">Lumban</text>
+
+            {/* Pila */}
+            <circle cx="600" cy="240" r="3" fill="#6b7280" opacity="0.5" />
+            <circle cx="600" cy="240" r="1.5" fill="#9ca3af" />
+            <text x="600" y="232" fill="#6b7280" fontSize="8" fontFamily="Inter" textAnchor="middle">Pila</text>
+
+            {/* Santa Maria */}
+            <circle cx="200" cy="370" r="3" fill="#6b7280" opacity="0.5" />
+            <circle cx="200" cy="370" r="1.5" fill="#9ca3af" />
+            <text x="200" y="362" fill="#6b7280" fontSize="8" fontFamily="Inter" textAnchor="middle">Santa Maria</text>
+
+            {/* Victoria */}
+            <circle cx="550" cy="360" r="3" fill="#6b7280" opacity="0.5" />
+            <circle cx="550" cy="360" r="1.5" fill="#9ca3af" />
+            <text x="550" y="352" fill="#6b7280" fontSize="8" fontFamily="Inter" textAnchor="middle">Victoria</text>
 
             {/* Province label */}
-            <text x="380" y="110" fill="#9ca3af" fontSize="18" fontFamily="Inter" fontWeight="800" textAnchor="middle" letterSpacing="6" opacity="0.5">
+            <text x="380" y="100" fill="#9ca3af" fontSize="20" fontFamily="Inter" fontWeight="800" textAnchor="middle" letterSpacing="8" opacity="0.4">
               LAGUNA
             </text>
+
+            {/* Compass rose */}
+            <g transform="translate(720, 80)">
+              <circle cx="0" cy="0" r="22" fill="none" stroke="#4b5563" strokeWidth="0.5" opacity="0.4" />
+              <line x1="0" y1="-18" x2="0" y2="-10" stroke="#9ca3af" strokeWidth="1" opacity="0.6" />
+              <line x1="0" y1="10" x2="0" y2="18" stroke="#6b7280" strokeWidth="0.8" opacity="0.4" />
+              <line x1="-18" y1="0" x2="-10" y2="0" stroke="#6b7280" strokeWidth="0.8" opacity="0.4" />
+              <line x1="10" y1="0" x2="18" y2="0" stroke="#6b7280" strokeWidth="0.8" opacity="0.4" />
+              <text x="0" y="-24" fill="#9ca3af" fontSize="8" fontFamily="Inter" fontWeight="700" textAnchor="middle">N</text>
+              <text x="0" y="30" fill="#6b7280" fontSize="7" fontFamily="Inter" textAnchor="middle">S</text>
+              <text x="-26" y="3" fill="#6b7280" fontSize="7" fontFamily="Inter" textAnchor="middle">W</text>
+              <text x="26" y="3" fill="#6b7280" fontSize="7" fontFamily="Inter" textAnchor="middle">E</text>
+              <polygon points="0,-8 -2,0 2,0" fill="#9ca3af" opacity="0.7" />
+              <polygon points="0,8 -2,0 2,0" fill="#6b7280" opacity="0.4" />
+            </g>
           </svg>
 
-          {/* Legend */}
-          <div className="absolute bottom-4 right-4 bg-gray-900/90 backdrop-blur-sm border border-gray-700/50 rounded-lg px-4 py-3 flex items-center gap-5">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-primary-500" />
-              <span className="text-[11px] text-gray-300">PSBC Paete</span>
+          {/* ═══ Stats overlay ═══ */}
+          <div className="absolute top-4 left-4 flex flex-col gap-2">
+            <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+              <div className="w-6 h-6 rounded bg-blue-500/20 flex items-center justify-center">
+                <Signal size={12} className="text-blue-400" />
+              </div>
+              <div>
+                <p className="text-[9px] text-gray-500 uppercase">Distance</p>
+                <p className="text-[11px] text-white font-semibold">~12 km</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
-              <span className="text-[11px] text-gray-300">PSBC Pagsanjan</span>
+            <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+              <div className="w-6 h-6 rounded bg-green-500/20 flex items-center justify-center">
+                <Wifi size={12} className="text-green-400" />
+              </div>
+              <div>
+                <p className="text-[9px] text-gray-500 uppercase">Latency</p>
+                <p className="text-[11px] text-green-400 font-semibold">&lt; 20ms</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-px bg-gradient-to-r from-primary-500 to-cyan-500" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #3b82f6 0, #3b82f6 4px, transparent 4px, transparent 8px)' }} />
-              <span className="text-[11px] text-gray-300">Live Connection</span>
+          </div>
+
+          {/* ═══ Feature badges ═══ */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+              <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
+                <Video size={12} className="text-purple-400" />
+              </div>
+              <div>
+                <p className="text-[9px] text-gray-500 uppercase">Video</p>
+                <p className="text-[11px] text-white font-semibold">720p HD</p>
+              </div>
+            </div>
+            <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+              <div className="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center">
+                <Shield size={12} className="text-amber-400" />
+              </div>
+              <div>
+                <p className="text-[9px] text-gray-500 uppercase">Encrypted</p>
+                <p className="text-[11px] text-white font-semibold">DTLS-SRTP</p>
+              </div>
+            </div>
+          </div>
+
+          {/* ═══ Legend ═══ */}
+          <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700/50 rounded-lg px-4 py-2.5 flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                <span className="text-[10px] text-gray-300">PSBC Paete</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
+                <span className="text-[10px] text-gray-300">PSBC Pagsanjan</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-px" style={{ background: 'linear-gradient(90deg, #3b82f6, #a855f7, #06b6d4)' }} />
+                <span className="text-[10px] text-gray-300">Live Connection</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] text-gray-300">Active Stream</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gray-500" />
+                <span className="text-[10px] text-gray-400">Nearby Municipality</span>
+              </div>
             </div>
           </div>
         </div>
