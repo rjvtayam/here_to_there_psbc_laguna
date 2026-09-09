@@ -58,11 +58,8 @@ function Navbar({ onLogin }: { onLogin: () => void }) {
           <span className="text-lg font-bold">Here to There</span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={onLogin} className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2">
-            Sign In
-          </button>
           <button onClick={onLogin} className="text-sm font-medium bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500 px-5 py-2 rounded-lg transition-all duration-300 shadow-lg shadow-primary-500/20">
-            Get Started
+            Authorized Login
           </button>
         </div>
       </div>
@@ -144,7 +141,7 @@ function HeroSection({ onGetStarted, onWatchDemo }: { onGetStarted: () => void; 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-16 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <button onClick={onGetStarted} className="group relative overflow-hidden bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500 text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl transition-all duration-300 shadow-xl shadow-primary-500/20 w-full sm:w-auto">
             <span className="relative flex items-center gap-2">
-              Launch Portal
+              Get Started
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </span>
           </button>
@@ -1520,7 +1517,7 @@ function CTASection({ onGetStarted }: { onGetStarted: () => void }) {
                 <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-400 to-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity" />
                 <span className="relative flex items-center gap-2">
                   <Radio size={18} />
-                  Launch Portal
+                  Get Started
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </button>
