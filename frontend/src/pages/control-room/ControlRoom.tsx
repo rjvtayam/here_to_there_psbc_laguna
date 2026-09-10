@@ -49,7 +49,6 @@ export function ControlRoom() {
         setDemoData(data);
         setShowWelcome(true);
       }
-      localStorage.removeItem('pending_live_demo');
     }
   }, []);
 
@@ -77,32 +76,7 @@ export function ControlRoom() {
   }, []);
 
   if (isEmergency) {
-    return (
-      <>
-        <EmergencyAlert />
-        {showWelcome && demoData && (
-          <WelcomeToast
-            name={demoData.name}
-            campus={demoData.campus}
-            role={demoData.role}
-            onComplete={() => {
-              setShowWelcome(false);
-              setShowLiveDemo(true);
-            }}
-          />
-        )}
-        {showLiveDemo && demoData && (
-          <LiveDemo
-            isOpen={showLiveDemo}
-            onClose={() => {
-              setShowLiveDemo(false);
-              localStorage.setItem(`demo_completed_${demoData.userId}`, 'true');
-            }}
-            userRole={demoData.role}
-          />
-        )}
-      </>
-    );
+    return <EmergencyAlert />;
   }
 
   const remoteUsers = roomUsers.filter((u) => {
@@ -376,7 +350,7 @@ export function ControlRoom() {
 
       <ChatPanel isOpen={showChat} onClose={() => setShowChat(false)} />
 
-      {showWelcome && demoData && (
+      {!isEmergency && showWelcome && demoData && (
         <WelcomeToast
           name={demoData.name}
           campus={demoData.campus}
@@ -388,11 +362,12 @@ export function ControlRoom() {
         />
       )}
 
-      {showLiveDemo && demoData && (
+      {!isEmergency && showLiveDemo && demoData && (
         <LiveDemo
           isOpen={showLiveDemo}
           onClose={() => {
             setShowLiveDemo(false);
+            localStorage.removeItem('pending_live_demo');
             localStorage.setItem(`demo_completed_${demoData.userId}`, 'true');
           }}
           userRole={demoData.role}
