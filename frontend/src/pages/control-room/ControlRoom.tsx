@@ -337,7 +337,11 @@ export function ControlRoom() {
         variant="danger"
         icon="radio"
         onConfirm={() => {
+          console.log('%c[ControlRoom] EMERGENCY CONFIRMED — emitting emergency_trigger', 'color: red; font-weight: bold;');
+          const socketConnected = (window as any).__socketConnected;
+          console.log('[ControlRoom] Socket connected:', socketConnected);
           emit('emergency_trigger', { message: 'Emergency from Control Room', mode: 'live' });
+          console.log('%c[ControlRoom] emergency_trigger emitted', 'color: orange; font-weight: bold;');
           setShowEmergencyConfirm(false);
         }}
         onCancel={() => setShowEmergencyConfirm(false)}

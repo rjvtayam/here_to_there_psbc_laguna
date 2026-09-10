@@ -328,7 +328,7 @@ async def emergency_trigger(sid, data):
                 pass
         print(f"[Backend] Emergency (campus={campus}): {full_name}: {emergency_msg[:50]}")
     else:
-        await sio.emit("emergency_alert", alert_payload, broadcast=True)
+        await sio.emit("emergency_alert", alert_payload)
         print(f"[Backend] Emergency (ALL): {full_name}: {emergency_msg[:50]}")
 
     try:
@@ -367,7 +367,7 @@ async def emergency_dismiss(sid, data=None):
     dismissor_role = session.get("role")
 
     if dismissor_role == "admin":
-        await sio.emit("emergency_dismissed", broadcast=True)
+        await sio.emit("emergency_dismissed")
         print(f"[Backend] Emergency dismissed by admin {session.get('full_name')}")
     else:
         members = room_members.get(MAIN_ROOM, set())
@@ -402,7 +402,7 @@ async def bulletin_update(sid, data):
         "content": content,
         "type": data.get("type", "bulletin"),
         "created_by": session.get("full_name"),
-    }, broadcast=True)
+    })
 
     try:
         db = SessionLocal()
