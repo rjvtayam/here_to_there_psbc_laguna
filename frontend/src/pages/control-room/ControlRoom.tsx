@@ -322,7 +322,7 @@ export function ControlRoom() {
                 audioDisabled={portalMode && !meetingMode}
                 screenShareDisabled={portalMode && !meetingMode}
               />
-              <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} />
+              <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} disabled={portalMode && !meetingMode} />
             </div>
           </div>
         </div>
