@@ -75,10 +75,6 @@ export function ControlRoom() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (isEmergency) {
-    return <EmergencyAlert />;
-  }
-
   const remoteUsers = roomUsers.filter((u) => {
     if (u.sid === mySid) return false;
     if (isAdmin) return true;
@@ -122,6 +118,7 @@ export function ControlRoom() {
 
   return (
     <DashboardLayout>
+      {isEmergency && <EmergencyAlert />}
       <div className="h-full flex flex-col p-2 sm:p-3 md:p-4">
         {/* Header */}
         <header className="flex items-center justify-between gap-2 mb-2 sm:mb-3 md:mb-4">
