@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
+import { EmergencyAlert } from './components/controls/EmergencyButton';
+import { useSessionStore } from './stores/sessionStore';
 import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/Login';
 import { CampusView } from './pages/campus/CampusView';
@@ -39,9 +41,12 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
 }
 
 export default function App() {
+  const isEmergency = useSessionStore((s) => s.isEmergency);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        {isEmergency && <EmergencyAlert />}
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />

@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { VideoCard } from '../../components/video/VideoCard';
 import { VideoControls } from '../../components/video/VideoControls';
 import { TalkButton } from '../../components/controls/TalkButton';
-import { EmergencyButton, EmergencyAlert } from '../../components/controls/EmergencyButton';
+import { EmergencyButton } from '../../components/controls/EmergencyButton';
 import { BulletinBoard } from '../../components/announcements/BulletinBoard';
 import { ChatPanel } from '../../components/chat/ChatPanel';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
@@ -118,7 +118,6 @@ export function ControlRoom() {
 
   return (
     <DashboardLayout>
-      {isEmergency && <EmergencyAlert />}
       <div className="h-full flex flex-col p-2 sm:p-3 md:p-4">
         {/* Header */}
         <header className="flex items-center justify-between gap-2 mb-2 sm:mb-3 md:mb-4">
@@ -323,7 +322,7 @@ export function ControlRoom() {
                 audioDisabled={portalMode && !meetingMode}
                 screenShareDisabled={portalMode && !meetingMode}
               />
-              <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} disabled={portalMode && !meetingMode} />
+              <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} />
             </div>
           </div>
         </div>

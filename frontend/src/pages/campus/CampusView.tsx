@@ -5,7 +5,7 @@ import { VideoCard } from '../../components/video/VideoCard';
 import { VideoControls } from '../../components/video/VideoControls';
 import { PortalToggle } from '../../components/controls/PortalToggle';
 import { TalkButton } from '../../components/controls/TalkButton';
-import { EmergencyButton, EmergencyAlert } from '../../components/controls/EmergencyButton';
+import { EmergencyButton } from '../../components/controls/EmergencyButton';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { BulletinBoard } from '../../components/announcements/BulletinBoard';
 import { ChatPanel } from '../../components/chat/ChatPanel';
@@ -101,7 +101,6 @@ export function CampusView() {
 
   return (
     <DashboardLayout>
-      {isEmergency && <EmergencyAlert />}
       <div className="h-full flex flex-col p-2 sm:p-3 md:p-4">
         <header className="flex items-center justify-between gap-2 mb-2 sm:mb-3 md:mb-4">
           <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-wrap">
@@ -287,7 +286,7 @@ export function CampusView() {
                 screenShareDisabled={portalMode && !meetingMode}
               />
               {user?.role === 'principal' && (
-                <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} disabled={portalMode && !meetingMode} />
+                <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} />
               )}
             </div>
           </div>

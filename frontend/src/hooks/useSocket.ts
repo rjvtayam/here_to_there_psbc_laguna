@@ -99,12 +99,14 @@ function initSocket(token: string, setRoomUsers: any, setEmergency: any) {
   });
 
   socket.on('emergency_alert', (data) => {
-    console.log('[Socket] emergency_alert:', data);
+    console.log('%c[Socket] ⚠️ EMERGENCY_ALERT RECEIVED:', 'color: red; font-weight: bold; font-size: 14px;', data);
+    console.log('[Socket] Current isEmergency:', useSessionStore.getState().isEmergency);
     setEmergency(true, data.message, data.triggered_by, data.triggered_by_role, data.campus_label, data.campus_only);
+    console.log('[Socket] After setEmergency, isEmergency:', useSessionStore.getState().isEmergency);
   });
 
   socket.on('emergency_dismissed', () => {
-    console.log('[Socket] emergency_dismissed');
+    console.log('%c[Socket] ✓ EMERGENCY_DISMISSED', 'color: green; font-weight: bold;');
     setEmergency(false);
   });
 

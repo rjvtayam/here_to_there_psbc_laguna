@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -33,13 +34,23 @@ export function EmergencyAlert() {
   const { emit } = useSocket();
   const canDismiss = user?.role === 'admin' || user?.role === 'principal';
 
+  useEffect(() => {
+    console.log('%c[EmergencyAlert] ✅ MOUNTED — Banner is now visible!', 'color: red; font-weight: bold; font-size: 14px;', {
+      message: emergencyMessage,
+      triggeredBy: emergencyTriggeredBy,
+      campus: emergencyCampus,
+      campusOnly: emergencyCampusOnly,
+    });
+    return () => console.log('[EmergencyAlert] unmounted');
+  }, []);
+
   const handleDismiss = () => {
     emit('emergency_dismiss');
     setEmergency(false);
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-600 via-red-700 to-red-600 border-b border-red-500/50 shadow-[0_4px_20px_rgba(220,38,38,0.4)] animate-pulse-slow">
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-red-600 via-red-700 to-red-600 border-b border-red-500/50 shadow-[0_4px_20px_rgba(220,38,38,0.4)] animate-pulse-slow">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Left: icon + info */}

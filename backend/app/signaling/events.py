@@ -284,11 +284,14 @@ async def screen_share_stop(sid, data):
 
 @sio.event
 async def emergency_trigger(sid, data):
+    print(f"[Backend] emergency_trigger received from sid={sid}, data={data}")
     try:
         session = await sio.get_session(sid)
     except (KeyError, Exception):
+        print(f"[Backend] emergency_trigger: no session for sid={sid}")
         return
     if session.get("role") not in ["principal", "admin"]:
+        print(f"[Backend] emergency_trigger: unauthorized role={session.get('role')}")
         await sio.emit("error", {"message": "Unauthorized"}, room=sid)
         return
 
@@ -350,7 +353,8 @@ async def emergency_trigger(sid, data):
 
 
 @sio.event
-async def emergency_dismiss(sid, data):
+async def emergency_dismiss(sid, data=None):
+    print(f"[Backend] emergency_dismiss received from sid={sid}")
     try:
         session = await sio.get_session(sid)
     except (KeyError, Exception):
