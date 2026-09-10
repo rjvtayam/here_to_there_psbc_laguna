@@ -1539,30 +1539,150 @@ function CTASection({ onGetStarted }: { onGetStarted: () => void }) {
 
 /* ─── FOOTER ─── */
 function Footer() {
+  const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | null>(null);
+
   return (
-    <footer className="border-t border-gray-800/50 py-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12 L10 7 L10 17 Z" fill="currentColor" />
-                <path d="M19 12 L14 7 L14 17 Z" fill="currentColor" opacity="0.4" />
-                <circle cx="12" cy="12" r="1.5" />
-              </svg>
+    <>
+      <footer className="border-t border-gray-800/50 py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12 L10 7 L10 17 Z" fill="currentColor" />
+                  <path d="M19 12 L14 7 L14 17 Z" fill="currentColor" opacity="0.4" />
+                  <circle cx="12" cy="12" r="1.5" />
+                </svg>
+              </div>
+              <span className="text-sm font-bold">Here to There</span>
             </div>
-            <span className="text-sm font-bold">Here to There</span>
-          </div>
-          <p className="text-xs text-gray-500">
-            Capstone Project &copy; 2026 &mdash; PSBC Paete &amp; PSBC Pagsanjan
-          </p>
-          <div className="flex gap-4">
-            <a href="mailto:support@heretothere.edu.ph" className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Support</a>
-            <span className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Privacy</span>
-            <span className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Terms</span>
+            <p className="text-xs text-gray-500">
+              Capstone Project &copy; 2026 &mdash; PSBC Paete &amp; PSBC Pagsanjan
+            </p>
+            <div className="flex gap-4">
+              <a href="mailto:support@heretothere.edu.ph" className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Support</a>
+              <button onClick={() => setActiveModal('privacy')} className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Privacy</button>
+              <button onClick={() => setActiveModal('terms')} className="text-xs text-gray-500 hover:text-gray-300 cursor-pointer transition-colors">Terms</button>
+            </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+
+      {/* ═══ Privacy Policy Modal ═══ */}
+      {activeModal === 'privacy' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setActiveModal(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative bg-gray-900 border border-gray-700/60 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800/60">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                  <Shield size={16} className="text-green-400" />
+                </div>
+                <h3 className="font-orbitron text-lg font-bold text-white">Privacy Policy</h3>
+              </div>
+              <button onClick={() => setActiveModal(null)} className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            {/* Content */}
+            <div className="px-6 py-5 overflow-y-auto max-h-[calc(80vh-70px)] space-y-5 text-sm text-gray-400 leading-relaxed">
+              <div>
+                <h4 className="text-white font-semibold mb-2">1. Information We Collect</h4>
+                <p>We collect account information (name, email, role, campus), video/audio streams during live sessions, chat messages, and usage analytics. All data is stored securely in encrypted databases.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">2. How We Use Your Information</h4>
+                <p>Collected data is used solely for providing intercampus communication services, authenticating users, monitoring system health, and ensuring security. We do not sell or share personal data with third parties.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">3. Video & Audio Streams</h4>
+                <p>All video and audio streams are transmitted peer-to-peer using WebRTC with DTLS-SRTP encryption. Streams are not recorded or stored on our servers unless explicitly initiated by authorized users.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">4. Data Security</h4>
+                <p>We implement industry-standard security measures including bcrypt password hashing, JWT authentication, HTTP-only cookies, rate limiting, account lockout protection, and AES encryption for sensitive data.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">5. Data Retention</h4>
+                <p>User accounts and associated data are retained as long as the account is active. Session data and audit logs are maintained for operational and security purposes. Chat messages are retained during active sessions.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">6. Your Rights</h4>
+                <p>Users can update their profile, download their data, enable/disable 2FA, and request account deactivation. Contact the system administrator for any data-related requests.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">7. Contact</h4>
+                <p>For privacy-related inquiries, contact us at <span className="text-cyan-400">support@heretothere.edu.ph</span></p>
+              </div>
+              <p className="text-[11px] text-gray-600 pt-2 border-t border-gray-800/50">Last updated: September 2026</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Terms of Service Modal ═══ */}
+      {activeModal === 'terms' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setActiveModal(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative bg-gray-900 border border-gray-700/60 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800/60">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                  <FileText size={16} className="text-amber-400" />
+                </div>
+                <h3 className="font-orbitron text-lg font-bold text-white">Terms of Service</h3>
+              </div>
+              <button onClick={() => setActiveModal(null)} className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            {/* Content */}
+            <div className="px-6 py-5 overflow-y-auto max-h-[calc(80vh-70px)] space-y-5 text-sm text-gray-400 leading-relaxed">
+              <div>
+                <h4 className="text-white font-semibold mb-2">1. Acceptance of Terms</h4>
+                <p>By accessing and using Here to There, you agree to be bound by these Terms of Service. This platform is designed for authorized personnel of PSBC Paete and PSBC Pagsanjan.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">2. Authorized Use</h4>
+                <p>This system is intended for legitimate educational and administrative purposes only. Users must have valid credentials provided by their campus administrator. Unauthorized access is prohibited.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">3. User Responsibilities</h4>
+                <p>Users are responsible for maintaining the confidentiality of their credentials, using the system appropriately, respecting other users during live sessions, and not misusing chat or bulletin features.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">4. Emergency Features</h4>
+                <p>The emergency broadcast system is reserved for genuine emergencies only. Misuse of emergency alerts may result in account suspension. Campus-specific alerts are visible only to the relevant campus.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">5. System Availability</h4>
+                <p>We strive to maintain high availability but do not guarantee uninterrupted service. Scheduled maintenance and updates may temporarily affect availability. We are not liable for connection issues beyond our control.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">6. Account Termination</h4>
+                <p>Accounts may be deactivated by administrators for policy violations. Users may also request deactivation. Deactivated accounts lose access to all platform features.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">7. Limitation of Liability</h4>
+                <p>Here to There is provided "as is" for educational purposes. The developers and PSBC are not liable for any damages arising from the use or inability to use this platform.</p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">8. Contact</h4>
+                <p>For questions about these terms, contact us at <span className="text-cyan-400">support@heretothere.edu.ph</span></p>
+              </div>
+              <p className="text-[11px] text-gray-600 pt-2 border-t border-gray-800/50">Last updated: September 2026</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
