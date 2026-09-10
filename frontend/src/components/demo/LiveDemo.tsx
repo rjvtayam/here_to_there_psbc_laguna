@@ -313,7 +313,13 @@ export function LiveDemo({ isOpen, onClose, userRole }: LiveDemoProps) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose, goNext, goPrev]);
 
-  if (!isOpen || !step) return null;
+  if (!isOpen || !step) {
+    // Safety: if no matching steps for role, close immediately and mark demo completed
+    if (isOpen && !step && filteredSteps.length === 0) {
+      onClose();
+    }
+    return null;
+  }
 
   return (
     <>

@@ -44,8 +44,10 @@ export function CampusView() {
     const pending = localStorage.getItem('pending_live_demo');
     if (pending) {
       const data = JSON.parse(pending);
-      setDemoData(data);
-      setShowWelcome(true);
+      if (data?.name && data?.campus && data?.role) {
+        setDemoData(data);
+        setShowWelcome(true);
+      }
       localStorage.removeItem('pending_live_demo');
     }
   }, []);
@@ -75,36 +77,59 @@ export function CampusView() {
 
   if (isEmergency) {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center z-50">
-        <div className="text-center animate-pulse max-w-2xl px-4 sm:px-6">
-          <Radio size={48} className="text-white mx-auto mb-3 sm:mb-4 md:hidden" />
-          <Radio size={64} className="text-white mx-auto mb-4 hidden md:block" />
-          <h1 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">EMERGENCY BROADCAST</h1>
-          {emergencyCampusOnly && emergencyCampus && (
-            <p className="text-xs sm:text-sm text-red-300 mb-2 sm:mb-3 font-semibold bg-white/10 border border-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full inline-block">
-              {emergencyCampus} Campus Only
-            </p>
-          )}
-          {emergencyTriggeredBy && (
-            <div className="mb-2 sm:mb-3">
-              <p className="text-sm sm:text-lg text-red-200 mb-1">Triggered by: <span className="font-bold text-white">{emergencyTriggeredBy}</span></p>
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                {emergencyTriggeredByRole && (
-                  <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
-                    {emergencyTriggeredByRole}
-                  </span>
-                )}
-                {emergencyCampus && (
-                  <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
-                    {emergencyCampus}
-                  </span>
-                )}
+      <>
+        <div className="fixed inset-0 bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center z-50">
+          <div className="text-center animate-pulse max-w-2xl px-4 sm:px-6">
+            <Radio size={48} className="text-white mx-auto mb-3 sm:mb-4 md:hidden" />
+            <Radio size={64} className="text-white mx-auto mb-4 hidden md:block" />
+            <h1 className="font-orbitron text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">EMERGENCY BROADCAST</h1>
+            {emergencyCampusOnly && emergencyCampus && (
+              <p className="text-xs sm:text-sm text-red-300 mb-2 sm:mb-3 font-semibold bg-white/10 border border-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full inline-block">
+                {emergencyCampus} Campus Only
+              </p>
+            )}
+            {emergencyTriggeredBy && (
+              <div className="mb-2 sm:mb-3">
+                <p className="text-sm sm:text-lg text-red-200 mb-1">Triggered by: <span className="font-bold text-white">{emergencyTriggeredBy}</span></p>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  {emergencyTriggeredByRole && (
+                    <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
+                      {emergencyTriggeredByRole}
+                    </span>
+                  )}
+                  {emergencyCampus && (
+                    <span className="text-xs font-semibold bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-white">
+                      {emergencyCampus}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-          <p className="text-base sm:text-xl text-red-100">{emergencyMessage || 'Please pay attention to the principal\'s announcement'}</p>
+            )}
+            <p className="text-base sm:text-xl text-red-100">{emergencyMessage || 'Please pay attention to the principal\'s announcement'}</p>
+          </div>
         </div>
-      </div>
+        {showWelcome && demoData && (
+          <WelcomeToast
+            name={demoData.name}
+            campus={demoData.campus}
+            role={demoData.role}
+            onComplete={() => {
+              setShowWelcome(false);
+              setShowLiveDemo(true);
+            }}
+          />
+        )}
+        {showLiveDemo && demoData && (
+          <LiveDemo
+            isOpen={showLiveDemo}
+            onClose={() => {
+              setShowLiveDemo(false);
+              localStorage.setItem(`demo_completed_${demoData.userId}`, 'true');
+            }}
+            userRole={demoData.role}
+          />
+        )}
+      </>
     );
   }
 

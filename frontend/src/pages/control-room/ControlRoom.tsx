@@ -45,8 +45,10 @@ export function ControlRoom() {
     const pending = localStorage.getItem('pending_live_demo');
     if (pending) {
       const data = JSON.parse(pending);
-      setDemoData(data);
-      setShowWelcome(true);
+      if (data?.name && data?.campus && data?.role) {
+        setDemoData(data);
+        setShowWelcome(true);
+      }
       localStorage.removeItem('pending_live_demo');
     }
   }, []);
@@ -75,7 +77,32 @@ export function ControlRoom() {
   }, []);
 
   if (isEmergency) {
-    return <EmergencyAlert />;
+    return (
+      <>
+        <EmergencyAlert />
+        {showWelcome && demoData && (
+          <WelcomeToast
+            name={demoData.name}
+            campus={demoData.campus}
+            role={demoData.role}
+            onComplete={() => {
+              setShowWelcome(false);
+              setShowLiveDemo(true);
+            }}
+          />
+        )}
+        {showLiveDemo && demoData && (
+          <LiveDemo
+            isOpen={showLiveDemo}
+            onClose={() => {
+              setShowLiveDemo(false);
+              localStorage.setItem(`demo_completed_${demoData.userId}`, 'true');
+            }}
+            userRole={demoData.role}
+          />
+        )}
+      </>
+    );
   }
 
   const remoteUsers = roomUsers.filter((u) => {
