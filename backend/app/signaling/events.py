@@ -319,7 +319,7 @@ async def emergency_trigger(sid, data):
         for member_sid in list(members):
             try:
                 member_session = await sio.get_session(member_sid)
-                if member_session and member_session.get("campus") == campus:
+                if member_session and (member_session.get("campus") == campus or member_session.get("role") == "admin"):
                     await sio.emit("emergency_alert", alert_payload, room=member_sid)
             except (KeyError, Exception):
                 pass
@@ -370,7 +370,7 @@ async def emergency_dismiss(sid, data):
         for member_sid in list(members):
             try:
                 member_session = await sio.get_session(member_sid)
-                if member_session and member_session.get("campus") == dismissor_campus:
+                if member_session and (member_session.get("campus") == dismissor_campus or member_session.get("role") == "admin"):
                     await sio.emit("emergency_dismissed", room=member_sid)
             except (KeyError, Exception):
                 pass

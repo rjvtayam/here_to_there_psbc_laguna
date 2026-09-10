@@ -323,7 +323,7 @@ export function ControlRoom() {
                 audioDisabled={portalMode && !meetingMode}
                 screenShareDisabled={portalMode && !meetingMode}
               />
-              <EmergencyButton onClick={() => !(portalMode && !meetingMode) && setShowEmergencyConfirm(true)} disabled={portalMode && !meetingMode} />
+              <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} />
             </div>
           </div>
         </div>
@@ -338,8 +338,7 @@ export function ControlRoom() {
         variant="danger"
         icon="radio"
         onConfirm={() => {
-          const mode = portalMode ? (meetingMode ? 'meeting' : 'portal') : 'live';
-          emit('emergency_trigger', { message: 'Emergency from Control Room', mode });
+          emit('emergency_trigger', { message: 'Emergency from Control Room', mode: 'live' });
           setShowEmergencyConfirm(false);
         }}
         onCancel={() => setShowEmergencyConfirm(false)}
