@@ -287,7 +287,7 @@ export function CampusView() {
                 screenShareDisabled={portalMode && !meetingMode}
               />
               {user?.role === 'principal' && (
-                <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} />
+                <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} disabled={portalMode && !meetingMode} />
               )}
             </div>
           </div>
