@@ -1542,24 +1542,22 @@ function Footer() {
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | null>(null);
 
   const privacySections = [
-    { icon: <Users size={16} />, title: 'Information We Collect', text: 'We collect account information (name, email, role, campus), video/audio streams during live sessions, chat messages, and usage analytics. All data is stored securely in encrypted databases.' },
-    { icon: <Eye size={16} />, title: 'How We Use Your Information', text: 'Collected data is used solely for providing intercampus communication services, authenticating users, monitoring system health, and ensuring security. We do not sell or share personal data with third parties.' },
-    { icon: <Video size={16} />, title: 'Video & Audio Streams', text: 'All video and audio streams are transmitted peer-to-peer using WebRTC with DTLS-SRTP encryption. Streams are not recorded or stored on our servers unless explicitly initiated by authorized users.' },
-    { icon: <Lock size={16} />, title: 'Data Security', text: 'We implement industry-standard security measures including bcrypt password hashing, JWT authentication, HTTP-only cookies, rate limiting, account lockout protection, and AES encryption for sensitive data.' },
-    { icon: <Clock size={16} />, title: 'Data Retention', text: 'User accounts and associated data are retained as long as the account is active. Session data and audit logs are maintained for operational and security purposes. Chat messages are retained during active sessions.' },
-    { icon: <Shield size={16} />, title: 'Your Rights', text: 'Users can update their profile, download their data, enable/disable 2FA, and request account deactivation. Contact the system administrator for any data-related requests.' },
-    { icon: <Mail size={16} />, title: 'Contact', text: 'For privacy-related inquiries, contact us at support@heretothere.edu.ph', highlight: true },
+    { icon: <Users size={15} />, title: 'Information We Collect', text: 'We collect account information (name, email, role, campus), video/audio streams during live sessions, chat messages, and usage analytics. All data is stored securely in encrypted databases.' },
+    { icon: <Eye size={15} />, title: 'How We Use Your Information', text: 'Collected data is used solely for providing intercampus communication services, authenticating users, monitoring system health, and ensuring security. We do not sell or share personal data with third parties.' },
+    { icon: <Video size={15} />, title: 'Video & Audio Streams', text: 'All video and audio streams are transmitted peer-to-peer using WebRTC with DTLS-SRTP encryption. Streams are not recorded or stored on our servers unless explicitly initiated by authorized users.' },
+    { icon: <Lock size={15} />, title: 'Data Security', text: 'We implement industry-standard security measures including bcrypt password hashing, JWT authentication, HTTP-only cookies, rate limiting, account lockout protection, and AES encryption for sensitive data.' },
+    { icon: <Clock size={15} />, title: 'Data Retention', text: 'User accounts and associated data are retained as long as the account is active. Session data and audit logs are maintained for operational and security purposes.' },
+    { icon: <Shield size={15} />, title: 'Your Rights', text: 'Users can update their profile, download their data, enable/disable 2FA, and request account deactivation. Contact the system administrator for any data-related requests.' },
   ];
 
   const termsSections = [
-    { icon: <CheckCircle2 size={16} />, title: 'Acceptance of Terms', text: 'By accessing and using Here to There, you agree to be bound by these Terms of Service. This platform is designed for authorized personnel of PSBC Paete and PSBC Pagsanjan.' },
-    { icon: <KeyRound size={16} />, title: 'Authorized Use', text: 'This system is intended for legitimate educational and administrative purposes only. Users must have valid credentials provided by their campus administrator. Unauthorized access is prohibited.' },
-    { icon: <Users size={16} />, title: 'User Responsibilities', text: 'Users are responsible for maintaining the confidentiality of their credentials, using the system appropriately, respecting other users during live sessions, and not misusing chat or bulletin features.' },
-    { icon: <Zap size={16} />, title: 'Emergency Features', text: 'The emergency broadcast system is reserved for genuine emergencies only. Misuse of emergency alerts may result in account suspension. Campus-specific alerts are visible only to the relevant campus.' },
-    { icon: <Globe size={16} />, title: 'System Availability', text: 'We strive to maintain high availability but do not guarantee uninterrupted service. Scheduled maintenance and updates may temporarily affect availability. We are not liable for connection issues beyond our control.' },
-    { icon: <Eye size={16} />, title: 'Account Termination', text: 'Accounts may be deactivated by administrators for policy violations. Users may also request deactivation. Deactivated accounts lose access to all platform features.' },
-    { icon: <Shield size={16} />, title: 'Limitation of Liability', text: 'Here to There is provided "as is" for educational purposes. The developers and PSBC are not liable for any damages arising from the use or inability to use this platform.' },
-    { icon: <Mail size={16} />, title: 'Contact', text: 'For questions about these terms, contact us at support@heretothere.edu.ph', highlight: true },
+    { icon: <CheckCircle2 size={15} />, title: 'Acceptance of Terms', text: 'By accessing and using Here to There, you agree to be bound by these Terms of Service. This platform is designed for authorized personnel of PSBC Paete and PSBC Pagsanjan.' },
+    { icon: <KeyRound size={15} />, title: 'Authorized Use', text: 'This system is intended for legitimate educational and administrative purposes only. Users must have valid credentials provided by their campus administrator.' },
+    { icon: <Users size={15} />, title: 'User Responsibilities', text: 'Users are responsible for maintaining the confidentiality of their credentials, using the system appropriately, respecting other users during live sessions.' },
+    { icon: <Zap size={15} />, title: 'Emergency Features', text: 'The emergency broadcast system is reserved for genuine emergencies only. Misuse of emergency alerts may result in account suspension.' },
+    { icon: <Globe size={15} />, title: 'System Availability', text: 'We strive to maintain high availability but do not guarantee uninterrupted service. Scheduled maintenance and updates may temporarily affect availability.' },
+    { icon: <Eye size={15} />, title: 'Account Termination', text: 'Accounts may be deactivated by administrators for policy violations. Users may also request deactivation.' },
+    { icon: <Shield size={15} />, title: 'Limitation of Liability', text: 'Here to There is provided "as is" for educational purposes. The developers and PSBC are not liable for any damages arising from the use of this platform.' },
   ];
 
   const renderModal = (
@@ -1567,16 +1565,17 @@ function Footer() {
     icon: React.ReactNode,
     title: string,
     gradient: string,
-    sections: typeof privacySections
+    sections: typeof privacySections,
+    image: string
   ) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setActiveModal(null)}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
       <div
-        className="relative w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-2xl border border-gray-700/40 bg-gray-900/95 backdrop-blur-xl shadow-[0_0_60px_-12px_rgba(0,0,0,0.5)]"
+        className="relative w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl border border-gray-700/40 bg-gray-900/95 backdrop-blur-xl shadow-[0_0_60px_-12px_rgba(0,0,0,0.5)]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Animated gradient header */}
-        <div className={`relative px-6 py-5 bg-gradient-to-r ${gradient} overflow-hidden`}>
+        {/* Gradient header */}
+        <div className={`relative px-6 py-4 bg-gradient-to-r ${gradient} overflow-hidden`}>
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -1584,63 +1583,77 @@ function Footer() {
                 {icon}
               </div>
               <div>
-                <h3 className="font-orbitron text-xl font-bold text-white tracking-wide">{title}</h3>
-                <p className="text-[11px] text-white/60 mt-0.5">Last updated: September 2026</p>
+                <h3 className="font-orbitron text-lg font-bold text-white tracking-wide">{title}</h3>
+                <p className="text-[10px] text-white/50 mt-0.5">Last updated: September 2026</p>
               </div>
             </div>
             <button
               onClick={() => setActiveModal(null)}
-              className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all"
+              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
         </div>
 
-        {/* Scrollbar content */}
-        <div className="px-6 py-5 overflow-y-auto max-h-[calc(85vh-88px)] custom-scrollbar">
-          <div className="space-y-3">
-            {sections.map((section, i) => (
-              <div
-                key={i}
-                className={`group relative rounded-xl border transition-all duration-300 ${
-                  section.highlight
-                    ? 'border-cyan-500/30 bg-cyan-500/5 hover:border-cyan-500/50'
-                    : 'border-gray-800/60 bg-gray-800/20 hover:border-gray-700/60 hover:bg-gray-800/30'
-                }`}
-              >
-                {/* Number badge */}
-                <div className="absolute -top-px -left-px">
-                  <div className={`w-6 h-6 rounded-tl-xl rounded-br-lg flex items-center justify-center text-[10px] font-bold ${
-                    section.highlight
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-800 text-gray-400 group-hover:bg-gray-700 group-hover:text-white'
-                  } transition-colors`}>
-                    {i + 1}
+        {/* Split layout content */}
+        <div className="flex max-h-[calc(85vh-68px)]">
+          {/* Left side — scrollable sections */}
+          <div className="flex-1 px-5 py-4 overflow-y-auto custom-scrollbar border-r border-gray-800/40">
+            <div className="space-y-2.5">
+              {sections.map((section, i) => (
+                <div
+                  key={i}
+                  className="group relative rounded-xl border border-gray-800/50 bg-gray-800/15 hover:border-gray-700/60 hover:bg-gray-800/25 transition-all duration-300"
+                >
+                  {/* Number badge */}
+                  <div className="absolute -top-px -left-px">
+                    <div className="w-5 h-5 rounded-tl-xl rounded-br-lg bg-gray-800 text-gray-500 group-hover:bg-gray-700 group-hover:text-white flex items-center justify-center text-[9px] font-bold transition-colors">
+                      {i + 1}
+                    </div>
+                  </div>
+                  <div className="pl-8 pr-4 py-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-gray-500 group-hover:text-gray-400 transition-colors">{section.icon}</span>
+                      <h4 className="text-[12px] font-semibold text-white">{section.title}</h4>
+                    </div>
+                    <p className="text-[11.5px] text-gray-400 leading-relaxed">{section.text}</p>
                   </div>
                 </div>
-
-                <div className="pl-10 pr-5 py-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className={`${
-                      section.highlight ? 'text-cyan-400' : 'text-gray-500 group-hover:text-gray-400'
-                    } transition-colors`}>
-                      {section.icon}
-                    </span>
-                    <h4 className="text-[13px] font-semibold text-white">{section.title}</h4>
-                  </div>
-                  <p className="text-[12.5px] text-gray-400 leading-relaxed">{section.text}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Footer */}
-          <div className="mt-5 pt-4 border-t border-gray-800/50 flex items-center justify-between">
-            <p className="text-[10px] text-gray-600 uppercase tracking-wider">Here to There &mdash; PSBC Laguna</p>
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] text-green-400/70">Active</span>
+          {/* Right side — image + contact */}
+          <div className="w-[280px] flex-shrink-0 flex flex-col">
+            {/* Image */}
+            <div className="flex-1 flex items-center justify-center p-5">
+              <img src={image} alt={title} className="max-w-full max-h-[260px] object-contain drop-shadow-[0_0_20px_rgba(168,85,247,0.15)]" />
+            </div>
+
+            {/* Contact card */}
+            <div className="mx-4 mb-4 rounded-xl border border-gray-800/50 bg-gray-800/20 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-lg bg-cyan-500/15 flex items-center justify-center">
+                  <Mail size={13} className="text-cyan-400" />
+                </div>
+                <span className="text-[11px] font-semibold text-white">Contact Us</span>
+              </div>
+              <p className="text-[10.5px] text-gray-400 mb-2.5">For any questions or concerns about this policy, reach out to us.</p>
+              <a
+                href="mailto:support@heretothere.edu.ph"
+                className="flex items-center gap-2 w-full px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 hover:border-cyan-500/40 transition-all group"
+              >
+                <Mail size={12} className="text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                <span className="text-[11px] text-cyan-400 group-hover:text-cyan-300 font-medium">support@heretothere.edu.ph</span>
+              </a>
+              <div className="mt-3 pt-2.5 border-t border-gray-800/40 flex items-center justify-between">
+                <p className="text-[9px] text-gray-600 uppercase tracking-wider">Here to There</p>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[9px] text-green-400/60">Active</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1680,7 +1693,8 @@ function Footer() {
         <Shield size={18} className="text-white" />,
         'Privacy Policy',
         'from-green-600/80 via-emerald-600/80 to-teal-600/80',
-        privacySections
+        privacySections,
+        '/images/privacy-img.png'
       )}
 
       {activeModal === 'terms' && renderModal(
@@ -1688,7 +1702,8 @@ function Footer() {
         <FileText size={18} className="text-white" />,
         'Terms of Service',
         'from-amber-600/80 via-orange-600/80 to-yellow-600/80',
-        termsSections
+        termsSections,
+        '/images/terms-img.webp'
       )}
     </>
   );
