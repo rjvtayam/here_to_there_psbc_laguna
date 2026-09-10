@@ -5,6 +5,7 @@ from uuid import UUID
 from app.database import get_db
 from app.schemas.session import SessionCreate, SessionResponse
 from app.services.session_service import SessionService
+from app.services.cache import invalidate, get_session_cache
 from app.api.deps import get_current_user
 
 router = APIRouter()
@@ -14,6 +15,7 @@ router = APIRouter()
 def create_session(data: SessionCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
     service = SessionService(db)
     session = service.create_session(data.title, user.id)
+    invalidate(get_session_cache(), "session")
     return session
 
 
@@ -46,6 +48,7 @@ def join_session(session_id: UUID, db: Session = Depends(get_db), user=Depends(g
     service = SessionService(db)
     try:
         service.join_session(session_id, user.id)
+        invalidate(get_session_cache(), "session")
         return {"message": "Joined session"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -55,6 +58,7 @@ def join_session(session_id: UUID, db: Session = Depends(get_db), user=Depends(g
 def leave_session(session_id: UUID, db: Session = Depends(get_db), user=Depends(get_current_user)):
     service = SessionService(db)
     service.leave_session(session_id, user.id)
+    invalidate(get_session_cache(), "session")
     return {"message": "Left session"}
 
 
@@ -62,6 +66,8 @@ def leave_session(session_id: UUID, db: Session = Depends(get_db), user=Depends(
 def end_session(session_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_user)):
     service = SessionService(db)
     try:
-        return service.end_session(session_id)
+        result = service.end_session(session_id)
+        invalidate(get_session_cache(), "session")
+        return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.schemas.user import UserResponse
 from app.services.user_service import UserService
+from app.services.cache import invalidate, get_user_list_cache, get_profile_cache
 from app.api.deps import get_current_user, require_admin, require_principal
 
 router = APIRouter()
@@ -49,7 +50,10 @@ def update_user(user_id: UUID, updates: UserUpdate, db: Session = Depends(get_db
         raise HTTPException(status_code=403, detail="Not authorized")
     service = UserService(db)
     try:
-        return service.update_user(user_id, updates.model_dump(exclude_none=True))
+        result = service.update_user(user_id, updates.model_dump(exclude_none=True))
+        invalidate(get_user_list_cache(), "users")
+        invalidate(get_profile_cache(), "profile")
+        return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -61,6 +65,8 @@ def deactivate_user(user_id: UUID, db: Session = Depends(get_db), current_user=D
     service = UserService(db)
     try:
         service.deactivate_user(user_id)
+        invalidate(get_user_list_cache(), "users")
+        invalidate(get_profile_cache(), "profile")
         return {"message": "User deactivated"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

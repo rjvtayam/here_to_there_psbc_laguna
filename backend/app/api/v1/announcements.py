@@ -5,6 +5,7 @@ from uuid import UUID
 from app.database import get_db
 from app.schemas.announcement import AnnouncementCreate, AnnouncementResponse
 from app.services.announcement_service import AnnouncementService
+from app.services.cache import invalidate, get_announcement_cache
 from app.api.deps import get_current_user, require_admin
 
 router = APIRouter()
@@ -13,7 +14,9 @@ router = APIRouter()
 @router.post("/", response_model=AnnouncementResponse, status_code=status.HTTP_201_CREATED)
 def create_announcement(data: AnnouncementCreate, db: Session = Depends(get_db), user=Depends(require_admin)):
     service = AnnouncementService(db)
-    return service.create_announcement(data, user.id)
+    result = service.create_announcement(data, user.id)
+    invalidate(get_announcement_cache(), "announcement")
+    return result
 
 
 @router.get("/", response_model=List[AnnouncementResponse])
@@ -39,7 +42,9 @@ def get_announcement(announcement_id: UUID, db: Session = Depends(get_db), _=Dep
 def update_announcement(announcement_id: UUID, updates: dict, db: Session = Depends(get_db), _=Depends(require_admin)):
     service = AnnouncementService(db)
     try:
-        return service.update_announcement(announcement_id, updates)
+        result = service.update_announcement(announcement_id, updates)
+        invalidate(get_announcement_cache(), "announcement")
+        return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -49,6 +54,7 @@ def deactivate_announcement(announcement_id: UUID, db: Session = Depends(get_db)
     service = AnnouncementService(db)
     try:
         service.deactivate_announcement(announcement_id)
+        invalidate(get_announcement_cache(), "announcement")
         return {"message": "Announcement deactivated"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

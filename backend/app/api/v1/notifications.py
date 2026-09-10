@@ -6,6 +6,7 @@ from app.models.notification import Notification
 from app.api.deps import get_current_user
 from app.models.user import User
 from uuid import UUID
+from app.services.cache import invalidate, get_profile_cache
 
 router = APIRouter()
 
@@ -55,6 +56,7 @@ def mark_read(notification_id: UUID, current_user: User = Depends(get_current_us
     try:
         notif.is_read = True
         db.commit()
+        invalidate(get_profile_cache(), "profile")
     except Exception:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to mark as read")
@@ -69,6 +71,7 @@ def mark_all_read(current_user: User = Depends(get_current_user), db: Session = 
             Notification.is_read == False,
         ).update({"is_read": True})
         db.commit()
+        invalidate(get_profile_cache(), "profile")
     except Exception:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to mark all as read")
@@ -87,6 +90,7 @@ def delete_notification(notification_id: UUID, current_user: User = Depends(get_
     try:
         db.delete(notif)
         db.commit()
+        invalidate(get_profile_cache(), "profile")
     except Exception:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete notification")

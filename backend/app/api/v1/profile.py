@@ -13,6 +13,7 @@ from app.api.deps import get_current_user
 from app.config import settings
 from app.middleware.rate_limit import limiter
 from app.utils.security import hash_password, verify_password
+from app.services.cache import invalidate, get_profile_cache
 
 router = APIRouter()
 
@@ -70,6 +71,7 @@ def update_profile(request: Request, data: ProfileUpdate, db: Session = Depends(
         db.add(log)
         db.commit()
         db.refresh(current_user)
+        invalidate(get_profile_cache(), "profile")
     except HTTPException:
         raise
     except Exception:
@@ -112,6 +114,7 @@ def change_password(request: Request, data: PasswordChange, db: Session = Depend
         )
         db.add(log)
         db.commit()
+        invalidate(get_profile_cache(), "profile")
     except Exception:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to change password")
@@ -174,6 +177,7 @@ async def upload_avatar(request: Request, file: UploadFile = File(...), db: Sess
         db.add(log)
         db.commit()
         db.refresh(current_user)
+        invalidate(get_profile_cache(), "profile")
     except HTTPException:
         raise
     except Exception:
@@ -259,6 +263,7 @@ def verify_2fa_setup(code: str, current_user: User = Depends(get_current_user), 
     try:
         current_user.two_factor_enabled = True
         db.commit()
+        invalidate(get_profile_cache(), "profile")
 
         log = AuditLog(
             user_id=current_user.id,
@@ -286,6 +291,7 @@ def disable_2fa(data: PasswordChange, current_user: User = Depends(get_current_u
         current_user.two_factor_enabled = False
         current_user.two_factor_secret = None
         db.commit()
+        invalidate(get_profile_cache(), "profile")
 
         log = AuditLog(
             user_id=current_user.id,

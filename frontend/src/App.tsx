@@ -8,7 +8,21 @@ import { ControlRoom } from './pages/control-room/ControlRoom';
 import { SettingsPage } from './pages/control-room/SettingsPage';
 import { UserManagement } from './pages/admin/UserManagement';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30 * 1000,       // 30s — data considered fresh
+      gcTime: 5 * 60 * 1000,      // 5min — garbage collect unused data
+      refetchOnWindowFocus: true,  // refetch when tab gets focus
+      refetchOnReconnect: true,    // refetch when network reconnects
+      retry: 1,                    // retry failed requests once
+      throwOnError: false,         // don't throw, let components handle errors
+    },
+    mutations: {
+      retry: 0,                    // no retry for mutations
+    },
+  },
+});
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
   const { user, token } = useAuthStore();
