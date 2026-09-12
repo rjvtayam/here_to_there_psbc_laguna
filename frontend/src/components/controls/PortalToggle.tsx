@@ -1,30 +1,25 @@
-import { Radio, Lock, Wifi } from 'lucide-react';
+import { Radio, Wifi } from 'lucide-react';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useSocket } from '../../hooks/useSocket';
 
-type PortalState = 'portal' | 'meeting' | 'live';
+type PortalState = 'portal' | 'live';
 
 interface PortalToggleProps {
   compact?: boolean;
 }
 
 export function PortalToggle({ compact = false }: PortalToggleProps) {
-  const { portalMode, meetingMode, togglePortalMode, setMeetingMode } = useSessionStore();
+  const { portalMode, togglePortalMode } = useSessionStore();
   const { emit } = useSocket();
 
-  const currentState: PortalState = portalMode ? (meetingMode ? 'meeting' : 'portal') : 'live';
+  const currentState: PortalState = portalMode ? 'portal' : 'live';
 
   const handleCycle = () => {
     if (currentState === 'portal') {
-      setMeetingMode(true);
-      emit('portal_mode_changed', { active: true, meeting: true });
-    } else if (currentState === 'meeting') {
       togglePortalMode();
-      setMeetingMode(false);
       emit('portal_mode_changed', { active: false, meeting: false });
     } else {
       togglePortalMode();
-      setMeetingMode(false);
       emit('portal_mode_changed', { active: true, meeting: false });
     }
   };
@@ -37,16 +32,7 @@ export function PortalToggle({ compact = false }: PortalToggleProps) {
         ? 'bg-green-500/15 border border-green-500/40 text-green-400'
         : 'bg-green-500/15 border border-green-500/40 text-green-400 shadow-lg shadow-green-500/10',
       dot: 'bg-green-400',
-      title: 'Portal Mode — Campus live feed. Click for IN MEETING',
-    },
-    meeting: {
-      label: 'IN MEETING',
-      icon: <Lock size={compact ? 12 : 14} className="text-amber-400" />,
-      styles: compact
-        ? 'bg-amber-500/15 border border-amber-500/40 text-amber-400'
-        : 'bg-amber-500/15 border border-amber-500/40 text-amber-400 shadow-lg shadow-amber-500/10',
-      dot: 'bg-amber-400',
-      title: 'In Meeting — Campus only, restricted. Click for LIVE',
+      title: 'Portal Mode — Campus live feed. Click for LIVE',
     },
     live: {
       label: 'LIVE',

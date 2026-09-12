@@ -12,6 +12,8 @@ class Announcement(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=True)
+    link = Column(Text, nullable=True)
+    image_url = Column(Text, nullable=True)
     type = Column(String(50), nullable=False, default="bulletin")
     target_campus = Column(String(50), nullable=False, default="both")
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))

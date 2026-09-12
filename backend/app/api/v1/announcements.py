@@ -4,7 +4,9 @@ from typing import List, Optional
 from uuid import UUID
 from app.database import get_db
 from app.schemas.announcement import AnnouncementCreate, AnnouncementResponse
+from app.schemas.announcement_reaction import ReactionToggle, ReactionSummary
 from app.services.announcement_service import AnnouncementService
+from app.services.announcement_reaction_service import AnnouncementReactionService
 from app.services.cache import invalidate, get_announcement_cache
 from app.api.deps import get_current_user, require_admin
 
@@ -58,3 +60,16 @@ def deactivate_announcement(announcement_id: UUID, db: Session = Depends(get_db)
         return {"message": "Announcement deactivated"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/{announcement_id}/reactions", response_model=dict)
+def toggle_reaction(announcement_id: UUID, data: ReactionToggle, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    service = AnnouncementReactionService(db)
+    result = service.toggle_reaction(announcement_id, user.id, data.emoji)
+    return result
+
+
+@router.get("/{announcement_id}/reactions", response_model=List[ReactionSummary])
+def get_reactions(announcement_id: UUID, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    service = AnnouncementReactionService(db)
+    return service.get_reactions(announcement_id, user.id)

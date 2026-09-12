@@ -8,6 +8,7 @@ import { Login } from './pages/Login';
 import { CampusView } from './pages/campus/CampusView';
 import { ControlRoom } from './pages/control-room/ControlRoom';
 import { SettingsPage } from './pages/control-room/SettingsPage';
+import { RecordsPage } from './pages/control-room/RecordsPage';
 import { UserManagement } from './pages/admin/UserManagement';
 
 const queryClient = new QueryClient({
@@ -74,6 +75,15 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['principal', 'admin']}>
                 <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/control-room/recordings"
+            element={
+              <ProtectedRoute allowedRoles={['principal', 'admin']}>
+                <RecordsPage />
               </ProtectedRoute>
             }
           />

@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
-import { Mic, MicOff, MonitorUp, Radio, VideoOff, User, Lock } from 'lucide-react';
+import { Mic, MicOff, MonitorUp, Radio, VideoOff, User, Lock, Camera, Hand } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { useSessionStore } from '../../stores/sessionStore';
 
 interface VideoCardProps {
   stream: MediaStream | null;
@@ -16,6 +17,7 @@ interface VideoCardProps {
   isVideoOff?: boolean;
   isScreenShare?: boolean;
   portalStatus?: 'portal' | 'meeting' | 'live' | null;
+  peerSid?: string;
 }
 
 export function VideoCard({
@@ -32,15 +34,33 @@ export function VideoCard({
   isVideoOff = false,
   isScreenShare = false,
   portalStatus = null,
+  peerSid,
 }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mirrorVideo = useSettingsStore((s) => s.mirrorVideo);
+  const isHandRaised = useSessionStore((s) => s.raisedHands[peerSid || ''] ?? false);
+  const allFloatingReactions = useSessionStore((s) => s.floatingReactions);
+  const removeFloatingReaction = useSessionStore((s) => s.removeFloatingReaction);
+  const claimedIds = useRef(new Set<number>());
+
+  const myReactions = allFloatingReactions.filter((r) => r.sid === peerSid && !claimedIds.current.has(r.id));
 
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
     }
   }, [stream, isVideoOff]);
+
+  useEffect(() => {
+    if (myReactions.length === 0) return;
+    myReactions.forEach((r) => {
+      claimedIds.current.add(r.id);
+      setTimeout(() => {
+        removeFloatingReaction(r.id);
+        claimedIds.current.delete(r.id);
+      }, 3500);
+    });
+  });
 
   const campusColors: Record<string, { bg: string; text: string; dot: string }> = {
     paete: { bg: 'bg-cyan-500/10 border-cyan-500/20', text: 'text-cyan-400', dot: 'bg-cyan-400' },
@@ -68,18 +88,15 @@ export function VideoCard({
         />
       ) : (
         <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 relative overflow-hidden">
-          {/* Animated background rings */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-20 h-20 rounded-full border border-gray-700/30 animate-ping" style={{ animationDuration: '3s' }} />
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-14 h-14 rounded-full border border-gray-700/20 animate-ping" style={{ animationDuration: '4s', animationDelay: '1s' }} />
           </div>
-          {/* Avatar */}
           <div className="relative z-10 w-10 h-10 rounded-full bg-gray-800 border-2 border-gray-700/50 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
             <User size={18} className="text-gray-500" />
           </div>
-          {/* Label */}
           <div className="relative z-10 flex items-center gap-1 text-[9px] text-gray-500 bg-gray-800/80 px-2 py-0.5 rounded-full border border-gray-700/40">
             <VideoOff size={9} />
             <span>Camera Off</span>
@@ -87,6 +104,30 @@ export function VideoCard({
         </div>
       )}
 
+      {/* Floating Reactions - Big centered emoji with smooth animation */}
+      {myReactions.map((r) => (
+        <div
+          key={r.id}
+          className="absolute z-30 pointer-events-none left-1/2 -translate-x-1/2"
+          style={{
+            bottom: '30%',
+            animation: 'floatUp 3.5s ease-out forwards',
+          }}
+        >
+          <span className="text-5xl drop-shadow-[0_0_12px_rgba(0,0,0,0.8)]">{r.emoji}</span>
+        </div>
+      ))}
+
+      {/* Hand Raised - Big bouncing indicator center */}
+      {isHandRaised && (
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 animate-bounce">
+          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-amber-500/90 border-2 border-amber-300/60 shadow-lg shadow-amber-500/40">
+            <Hand size={28} className="text-white fill-white" />
+          </div>
+        </div>
+      )}
+
+      {/* Top header */}
       <div className="absolute top-0 left-0 right-0 p-2 bg-gradient-to-b from-black/60 to-transparent">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -96,6 +137,9 @@ export function VideoCard({
             <span className="text-white text-[10px] sm:text-xs font-medium truncate max-w-[60px] sm:max-w-[100px]">
               {isLocal ? 'You' : name}
             </span>
+            {isHandRaised && !isLocal && (
+              <Hand size={12} className="text-amber-400 fill-amber-400 animate-bounce" />
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             {isScreenSharing && (
@@ -109,7 +153,7 @@ export function VideoCard({
               </span>
             )}
             {!isLocal && portalStatus === 'portal' && isPortalLive && (
-              <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 border border-green-500/30 px-1.5 py-0.5 rounded">
+              <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-500/10 border border-green-500/20 px-1.5 py-0.5 rounded">
                 <Radio size={10} /> PORTAL
               </span>
             )}
@@ -122,11 +166,36 @@ export function VideoCard({
         </div>
       </div>
 
+      {/* Bottom status bar */}
       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
         <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] ${isMuted ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
-            {isMuted ? <MicOff size={10} /> : <Mic size={10} />}
-            {isMuted ? 'Muted' : 'Live'}
+          <div className="flex items-center gap-1">
+            {/* Mic indicator */}
+            <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${isMuted ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+              {isMuted ? <MicOff size={10} /> : <Mic size={10} />}
+            </div>
+            {/* Camera indicator */}
+            <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${isVideoOff ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+              {isVideoOff ? <VideoOff size={10} /> : <Camera size={10} />}
+            </div>
+            {/* Hand raised indicator */}
+            {isHandRaised && (
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                <Hand size={10} className="fill-amber-400" />
+                <span className="hidden sm:inline">Hand</span>
+              </div>
+            )}
+            {/* Latest reaction indicator */}
+            {myReactions.length > 0 && (
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] bg-primary-500/20 text-primary-300 border border-primary-500/30 animate-pulse">
+                <span>{myReactions[myReactions.length - 1].emoji}</span>
+              </div>
+            )}
+          </div>
+          <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+            !isMuted && !isVideoOff ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+          }`}>
+            {!isMuted && !isVideoOff ? 'Live' : isMuted && isVideoOff ? 'Muted · Cam Off' : isMuted ? 'Muted' : 'Cam Off'}
           </div>
         </div>
       </div>

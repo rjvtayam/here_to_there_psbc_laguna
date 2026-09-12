@@ -28,6 +28,33 @@ export default {
           pagsanjan: '#06b6d4',
         },
       },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'badge-pulse': 'badgePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'slide-up': 'slideUp 0.2s ease-out',
+        'float-up': 'floatUp 3.5s ease-out forwards',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateX(-50%) translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateX(-50%) translateY(0)' },
+        },
+        badgePulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.6' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        floatUp: {
+          '0%': { opacity: '0', transform: 'translateX(-50%) translateY(0) scale(0.5)' },
+          '15%': { opacity: '1', transform: 'translateX(-50%) translateY(-20px) scale(1.1)' },
+          '70%': { opacity: '1', transform: 'translateX(-50%) translateY(-80px) scale(1)' },
+          '100%': { opacity: '0', transform: 'translateX(-50%) translateY(-130px) scale(0.7)' },
+        },
+      },
     },
   },
   plugins: [],

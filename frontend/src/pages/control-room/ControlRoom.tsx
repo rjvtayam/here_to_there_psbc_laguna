@@ -5,10 +5,14 @@ import { VideoControls } from '../../components/video/VideoControls';
 import { TalkButton } from '../../components/controls/TalkButton';
 import { EmergencyButton } from '../../components/controls/EmergencyButton';
 import { BulletinBoard } from '../../components/announcements/BulletinBoard';
+import { ActivityToast, pushActivity } from '../../components/ui/ActivityToast';
+import { NotificationToast } from '../../components/ui/NotificationToast';
 import { ChatPanel } from '../../components/chat/ChatPanel';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { useWebRTC } from '../../hooks/useWebRTC';
 import { useSocket } from '../../hooks/useSocket';
+import { useSettingsSync } from '../../hooks/useSettingsSync';
+import { useRecording } from '../../hooks/useRecording';
 import { usePeerStore } from '../../stores/peerStore';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -24,9 +28,11 @@ export function ControlRoom() {
   const roomId = ROOMS.MAIN;
   const { startLocalStream, toggleVideo, shareScreen } = useWebRTC(roomId);
   const { emit } = useSocket();
+  useSettingsSync();
   const { localStream, isVideoOff, isScreenSharing, localMicActive } = usePeerStore();
-  const { roomUsers, isEmergency, emergencyTriggeredBy, remotePortalModes, remoteMeetingModes, screenSharerSid, portalMode, meetingMode } = useSessionStore();
+  const { roomUsers, isEmergency, emergencyTriggeredBy, remotePortalModes, remoteMeetingModes, remoteVideoOff, remoteAudioMuted, screenSharerSid, portalMode, unreadAllCount, unreadCampusCount, clearUnreadChat } = useSessionStore();
   const { user } = useAuthStore();
+  const { isRecording, elapsedTime, uploading: recordingUploading, startRecording, stopRecording, formatTime: formatRecordingTime } = useRecording(roomId);
   const [activeTalkTarget, setActiveTalkTarget] = useState<'paete' | 'pagsanjan' | 'both' | null>(null);
   const [showEmergencyConfirm, setShowEmergencyConfirm] = useState(false);
   const [showChat, setShowChat] = useState(false);
@@ -35,6 +41,7 @@ export function ControlRoom() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showLiveDemo, setShowLiveDemo] = useState(false);
   const [demoData, setDemoData] = useState<{ userId: string; name: string; campus: string; role: string } | null>(null);
+  const [isHandRaised, setIsHandRaised] = useState(false);
 
   const myCampus = user?.campus;
   const mySid = useSocket().socket?.id;
@@ -55,15 +62,49 @@ export function ControlRoom() {
   useEffect(() => {
     const init = async () => {
       try {
+        localStorage.setItem('current_room_id', roomId);
         await startLocalStream();
         emit('join_room', { room_id: roomId });
-        emit('portal_mode_changed', { active: portalMode, meeting: meetingMode });
+        emit('portal_mode_changed', { active: portalMode, meeting: false });
       } catch (err) {
         console.error('[ControlRoom] Error in init:', err);
       }
     };
     init();
+    return () => {
+      localStorage.removeItem('current_room_id');
+    };
   }, []);
+
+  useEffect(() => {
+    const handleJoin = (e: Event) => {
+      const { user, campus, role } = (e as CustomEvent).detail;
+      pushActivity({ type: 'join', user, campus, role });
+    };
+    const handleLeave = (e: Event) => {
+      const { user, campus, role } = (e as CustomEvent).detail;
+      pushActivity({ type: 'leave', user, campus, role });
+    };
+    window.addEventListener('participant_joined', handleJoin);
+    window.addEventListener('participant_left', handleLeave);
+    return () => {
+      window.removeEventListener('participant_joined', handleJoin);
+      window.removeEventListener('participant_left', handleLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAdmin || !localStream) return;
+    if (portalMode) {
+      localStream.getVideoTracks().forEach((track) => { track.enabled = false; });
+      usePeerStore.setState({ isVideoOff: true });
+      emit('mute_video', { video_off: true });
+    } else {
+      localStream.getVideoTracks().forEach((track) => { track.enabled = true; });
+      usePeerStore.setState({ isVideoOff: false });
+      emit('mute_video', { video_off: false });
+    }
+  }, [portalMode, isAdmin, localStream, emit]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -77,8 +118,7 @@ export function ControlRoom() {
 
   const remoteUsers = roomUsers.filter((u) => {
     if (u.sid === mySid) return false;
-    if (isAdmin) return true;
-    return u.role !== 'admin';
+    return true;
   });
 
   const handleTalkTo = (target: 'paete' | 'pagsanjan' | 'both') => {
@@ -93,6 +133,22 @@ export function ControlRoom() {
       }
       return next;
     });
+  };
+
+  const handleToggleHand = () => {
+    setIsHandRaised((prev) => {
+      const next = !prev;
+      emit(next ? 'raise_hand' : 'lower_hand');
+      if (mySid) {
+        useSessionStore.getState().setRaisedHand(mySid, next);
+      }
+      return next;
+    });
+  };
+
+  const handleReact = (emoji: string) => {
+    emit('send_reaction', { emoji });
+    useSessionStore.getState().addFloatingReaction(mySid || 'local', emoji);
   };
 
   const getHighlight = (campus: string) => {
@@ -131,15 +187,22 @@ export function ControlRoom() {
                 ADMIN
               </span>
             )}
+            {isRecording && (
+              <span className="flex items-center gap-1.5 text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded-md font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                REC {formatRecordingTime(elapsedTime)}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <div className="relative" ref={onlinePanelRef}>
               <button
                 onClick={() => setShowOnlinePanel(!showOnlinePanel)}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors px-1.5 sm:px-2 py-1.5 rounded-lg hover:bg-gray-700"
+                className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-2 sm:px-3 py-1.5 rounded-lg hover:bg-gray-700"
                 data-demo="online-count"
               >
-                <Users size={14} /> <span className="hidden xs:inline">{roomUsers.length}</span>
+                <Users size={14} /> <span className="text-gray-500">Online</span>
+                <span className="min-w-[18px] h-[18px] bg-green-500/20 text-green-400 border border-green-500/30 rounded-full text-[10px] font-bold flex items-center justify-center px-1">{roomUsers.length}</span>
               </button>
 
               {showOnlinePanel && (
@@ -191,11 +254,16 @@ export function ControlRoom() {
             <div className="hidden sm:flex"><PortalStatusIndicator /></div>
             <div className="hidden md:flex"><MicTalkingIndicator /></div>
             <button
-              onClick={() => setShowChat(true)}
-              className="p-1.5 sm:p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+              onClick={() => { setShowChat(true); clearUnreadChat(); }}
+              className="relative p-1.5 sm:p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
               data-demo="btn-chat"
             >
               <MessageSquare size={16} />
+              {(unreadAllCount + unreadCampusCount) > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-blue-500 rounded-full text-[10px] font-bold flex items-center justify-center px-1 animate-badge-pulse">
+                  {(unreadAllCount + unreadCampusCount) > 99 ? '99+' : (unreadAllCount + unreadCampusCount)}
+                </span>
+              )}
             </button>
             <div data-demo="btn-bell"><BulletinBoard /></div>
           </div>
@@ -219,9 +287,12 @@ export function ControlRoom() {
                         campus={sharer.campus}
                         isLocal={isLocalSharer}
                         {...(!isLocalSharer ? getHighlight(sharer.campus) : {})}
+                        isMuted={!isLocalSharer && (remoteAudioMuted[sharer.sid] || false)}
+                        isVideoOff={!isLocalSharer && (remoteVideoOff[sharer.sid] || false)}
                         isPortalLive={!isLocalSharer && (remotePortalModes[sharer.sid] ?? false)}
                         portalStatus={!isLocalSharer ? (remoteMeetingModes[sharer.sid] ? 'meeting' : (remotePortalModes[sharer.sid] ? 'portal' : 'live')) : null}
                         isScreenShare={true}
+                        peerSid={isLocalSharer ? undefined : sharer.sid}
                       />
                       <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex items-center gap-1 text-[10px] sm:text-[11px] text-green-400 bg-green-500/15 border border-green-500/30 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg font-semibold backdrop-blur-sm">
                         <MonitorUp size={10} className="sm:hidden md:block md:w-3 md:h-3" />
@@ -241,8 +312,11 @@ export function ControlRoom() {
                         name={u.user}
                         campus={u.campus}
                         isSmall={true}
+                        isMuted={remoteAudioMuted[u.sid] || false}
+                        isVideoOff={remoteVideoOff[u.sid] || false}
                         isPortalLive={remotePortalModes[u.sid] ?? false}
                         portalStatus={remoteMeetingModes[u.sid] ? 'meeting' : (remotePortalModes[u.sid] ? 'portal' : 'live')}
+                        peerSid={u.sid}
                       />
                     </div>
                   ))}
@@ -258,8 +332,11 @@ export function ControlRoom() {
                   name={u.user}
                   campus={u.campus}
                   {...getHighlight(u.campus)}
+                  isMuted={remoteAudioMuted[u.sid] || false}
+                  isVideoOff={remoteVideoOff[u.sid] || false}
                   isPortalLive={remotePortalModes[u.sid] ?? false}
                   portalStatus={remoteMeetingModes[u.sid] ? 'meeting' : (remotePortalModes[u.sid] ? 'portal' : 'live')}
+                  peerSid={u.sid}
                 />
               ))}
             </div>
@@ -282,7 +359,9 @@ export function ControlRoom() {
               campus={myCampus || 'control_room'}
               isLocal={true}
               isSmall={true}
+              isMuted={!localMicActive}
               isVideoOff={isVideoOff}
+              peerSid={mySid}
             />
           </div>
 
@@ -291,8 +370,8 @@ export function ControlRoom() {
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
               {myCampus && myCampus !== 'control_room' && (
                 <>
-                  <span className="text-[10px] sm:text-xs text-gray-500 bg-gray-800 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-gray-700/50" data-demo="campus-badge">
-                    <span className="text-white font-semibold">{myCampus.toUpperCase()}</span>
+                  <span className={`text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border ${myCampus === 'paete' ? 'text-cyan-300 bg-cyan-500/10 border-cyan-500/30' : 'text-purple-300 bg-purple-500/10 border-purple-500/30'}`} data-demo="campus-badge">
+                    <span className="opacity-60">Campus :</span> <span className="font-bold">{myCampus.toUpperCase()}</span>
                   </span>
                   <TalkButton
                     target={myCampus === 'paete' ? 'pagsanjan' : 'paete'}
@@ -304,9 +383,9 @@ export function ControlRoom() {
               )}
               {!myCampus || myCampus === 'control_room' ? (
                 <>
-                  <TalkButton target="paete" isActive={activeTalkTarget === 'paete'} onClick={() => handleTalkTo('paete')} disabled={portalMode && !meetingMode} />
-                  <TalkButton target="pagsanjan" isActive={activeTalkTarget === 'pagsanjan'} onClick={() => handleTalkTo('pagsanjan')} disabled={portalMode && !meetingMode} />
-                  <TalkButton target="both" isActive={activeTalkTarget === 'both'} onClick={() => handleTalkTo('both')} disabled={portalMode && !meetingMode} />
+                  <TalkButton target="paete" isActive={activeTalkTarget === 'paete'} onClick={() => handleTalkTo('paete')} disabled={portalMode} />
+                  <TalkButton target="pagsanjan" isActive={activeTalkTarget === 'pagsanjan'} onClick={() => handleTalkTo('pagsanjan')} disabled={portalMode} />
+                  <TalkButton target="both" isActive={activeTalkTarget === 'both'} onClick={() => handleTalkTo('both')} disabled={portalMode} />
                 </>
               ) : null}
             </div>
@@ -316,13 +395,24 @@ export function ControlRoom() {
                 isAudioMuted={!localMicActive}
                 isVideoOff={isVideoOff}
                 isScreenSharing={isScreenSharing}
-                onToggleAudio={() => !(portalMode && !meetingMode) && setLocalMicActive(!localMicActive)}
+                onToggleAudio={() => !portalMode && setLocalMicActive(!localMicActive)}
                 onToggleVideo={toggleVideo}
-                onToggleScreenShare={() => !(portalMode && !meetingMode) && shareScreen().catch(() => {})}
-                audioDisabled={portalMode && !meetingMode}
-                screenShareDisabled={portalMode && !meetingMode}
+                onToggleScreenShare={() => !portalMode && shareScreen().catch(() => {})}
+                isHandRaised={isHandRaised}
+                onToggleHand={handleToggleHand}
+                onReact={handleReact}
+                audioDisabled={isAdmin && portalMode}
+                videoDisabled={isAdmin && portalMode}
+                screenShareDisabled={isAdmin && portalMode}
+                handDisabled={isAdmin && portalMode}
+                reactionDisabled={isAdmin && portalMode}
+                isRecording={isRecording}
+                recordingUploading={recordingUploading}
+                recordingTime={isRecording ? formatRecordingTime(elapsedTime) : undefined}
+                onToggleRecording={isAdmin ? (isRecording ? stopRecording : startRecording) : undefined}
+                recordingDisabled={!isAdmin || (isAdmin && portalMode)}
               />
-              <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} disabled={portalMode && !meetingMode} />
+              <EmergencyButton onClick={() => setShowEmergencyConfirm(true)} onDismiss={() => { emit('emergency_dismiss'); }} disabled={portalMode} />
             </div>
           </div>
         </div>
@@ -372,6 +462,9 @@ export function ControlRoom() {
           userRole={demoData.role}
         />
       )}
+
+      <ActivityToast />
+      <NotificationToast />
     </DashboardLayout>
   );
 }

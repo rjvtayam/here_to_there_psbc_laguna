@@ -1,7 +1,9 @@
 import socketio
+from datetime import datetime, timedelta
 from app.services.broadcast_service import BroadcastService
 from app.database import SessionLocal
 from app.services.notification_service import NotificationService
+from app.models.chat_message import ChatMessage as ChatMessageModel
 
 from app.config import settings
 
@@ -20,6 +22,9 @@ sio = socketio.AsyncServer(
 broadcast_service = BroadcastService()
 
 room_members: dict[str, set[str]] = {}
+
+chat_history: dict[str, list[dict]] = {}
+CHAT_HISTORY_LIMIT = 200
 
 
 @sio.event
@@ -57,6 +62,8 @@ async def disconnect(sid, reason=""):
             await sio.emit("peer_left", {
                 "sid": sid,
                 "user": session.get("full_name"),
+                "campus": session.get("campus"),
+                "role": session.get("role"),
             }, room=room_id)
             await sio.leave_room(sid, room_id)
         except Exception:
@@ -131,6 +138,48 @@ async def join_room(sid, data):
         except (KeyError, Exception):
             pass
 
+    history = chat_history.get(room_id, [])
+    if not history:
+        try:
+            db = SessionLocal()
+            db_msgs = (
+                db.query(ChatMessageModel)
+                .filter(ChatMessageModel.room_id == room_id)
+                .order_by(ChatMessageModel.created_at.desc())
+                .limit(100)
+                .all()
+            )
+            db.close()
+            if db_msgs:
+                db_msgs.reverse()
+                history = [
+                    {
+                        "id": str(m.id),
+                        "user": m.full_name,
+                        "campus": m.campus,
+                        "role": m.role,
+                        "message": m.message,
+                        "target": m.target,
+                        "campus_scope": m.campus_scope,
+                        "timestamp": m.created_at.isoformat() if m.created_at else "",
+                        "reply_to_id": str(m.reply_to_id) if m.reply_to_id else None,
+                        "reply_to_user": m.reply_to_user,
+                        "reply_to_message": m.reply_to_message,
+                    }
+                    for m in db_msgs
+                ]
+                chat_history[room_id] = history[-CHAT_HISTORY_LIMIT:]
+        except Exception as e:
+            print(f"[Backend] chat_history DB fetch error: {e}")
+
+    print(f"[Backend] join_room history check: room={room_id}, history_len={len(history)}, for={session.get('full_name')}")
+    if history:
+        await sio.emit("chat_history", {"messages": history[-100:]}, room=sid)
+        print(f"[Backend] Sent {len(history[-100:])} chat history messages to {session.get('full_name')}")
+    else:
+        await sio.emit("chat_history", {"messages": []}, room=sid)
+        print(f"[Backend] No chat history for {session.get('full_name')} in room {room_id}")
+
 
 @sio.event
 async def leave_room(sid, data):
@@ -146,6 +195,8 @@ async def leave_room(sid, data):
     await sio.emit("peer_left", {
         "sid": sid,
         "user": session.get("full_name"),
+        "campus": session.get("campus"),
+        "role": session.get("role"),
     }, room=room_id)
     await sio.leave_room(sid, room_id)
     session.pop("current_room", None)
@@ -311,6 +362,7 @@ async def emergency_trigger(sid, data):
     alert_payload = {
         "triggered_by": full_name,
         "triggered_by_role": role_label,
+        "triggered_by_sid": sid,
         "campus": campus,
         "campus_label": campus_label,
         "message": emergency_msg,
@@ -401,6 +453,9 @@ async def bulletin_update(sid, data):
         "title": title,
         "content": content,
         "type": data.get("type", "bulletin"),
+        "link": data.get("link"),
+        "image_url": data.get("image_url"),
+        "target_campus": data.get("target_campus", "both"),
         "created_by": session.get("full_name"),
     })
 
@@ -415,6 +470,53 @@ async def bulletin_update(sid, data):
         db.close()
     except Exception:
         pass
+
+
+@sio.event
+async def reaction_update(sid, data):
+    try:
+        session = await sio.get_session(sid)
+    except (KeyError, Exception):
+        return
+    if not session:
+        return
+
+    announcement_id = data.get("announcement_id")
+    emoji = data.get("emoji")
+    action = data.get("action")
+    if not announcement_id or not emoji or not action:
+        return
+
+    await sio.emit("reaction_update", {
+        "announcement_id": announcement_id,
+        "emoji": emoji,
+        "action": action,
+        "user": session.get("full_name"),
+    })
+
+
+@sio.event
+async def chat_reaction_update(sid, data):
+    try:
+        session = await sio.get_session(sid)
+    except (KeyError, Exception):
+        return
+    if not session:
+        return
+
+    message_id = data.get("message_id")
+    emoji = data.get("emoji")
+    action = data.get("action")
+    room_id = session.get("current_room")
+    if not message_id or not emoji or not action or not room_id:
+        return
+
+    await sio.emit("chat_reaction_update", {
+        "message_id": message_id,
+        "emoji": emoji,
+        "action": action,
+        "user": session.get("full_name"),
+    }, room=room_id)
 
 
 @sio.event
@@ -439,30 +541,65 @@ async def chat_message(sid, data):
 
     target = data.get("target", "all")
     sender_campus = session.get("campus")
+    scope = data.get("campus_scope", sender_campus) if target == "campus" else None
+    timestamp = datetime.utcnow().isoformat()
+
+    reply_to_id = data.get("reply_to_id")
+    reply_to_user = data.get("reply_to_user")
+    reply_to_message = data.get("reply_to_message")
+
+    import uuid as _uuid
+    msg_id = str(_uuid.uuid4())
 
     msg_data = {
+        "id": msg_id,
         "sid": sid,
         "user": session.get("full_name"),
         "campus": sender_campus,
         "role": session.get("role"),
         "message": message,
         "target": target,
-        "timestamp": __import__("datetime").datetime.utcnow().isoformat(),
+        "campus_scope": scope,
+        "timestamp": timestamp,
     }
 
-    if target == "campus":
-        members = room_members.get(room_id, set())
-        for member_sid in list(members):
-            try:
-                member_session = await sio.get_session(member_sid)
-                if member_session and member_session.get("campus") == sender_campus:
-                    await sio.emit("chat_message", msg_data, room=member_sid)
-            except (KeyError, Exception):
-                pass
-        print(f"[Backend] chat_message (campus={sender_campus}): {session.get('full_name')}: {message[:50]}")
-    else:
-        await sio.emit("chat_message", msg_data, room=room_id)
-        print(f"[Backend] chat_message (all): {session.get('full_name')}: {message[:50]}")
+    if reply_to_id:
+        msg_data["reply_to_id"] = reply_to_id
+        msg_data["reply_to_user"] = reply_to_user
+        msg_data["reply_to_message"] = reply_to_message
+
+    if room_id not in chat_history:
+        chat_history[room_id] = []
+
+    try:
+        db = SessionLocal()
+        db_msg = ChatMessageModel(
+            id=_uuid.UUID(msg_id),
+            user_id=session.get("user_id"),
+            full_name=session.get("full_name"),
+            campus=sender_campus,
+            role=session.get("role"),
+            message=message,
+            target=target,
+            campus_scope=scope,
+            room_id=room_id,
+            reply_to_id=reply_to_id,
+            reply_to_user=reply_to_user,
+            reply_to_message=reply_to_message,
+            created_at=datetime.utcnow(),
+        )
+        db.add(db_msg)
+        db.commit()
+        db.close()
+        print(f"[Backend] chat_message saved to DB: {session.get('full_name')}: {message[:50]}")
+    except Exception as e:
+        print(f"[Backend] chat_message DB save error: {e}")
+
+    chat_history[room_id].append(msg_data)
+    if len(chat_history[room_id]) > CHAT_HISTORY_LIMIT:
+        chat_history[room_id] = chat_history[room_id][-CHAT_HISTORY_LIMIT:]
+
+    await sio.emit("chat_message", msg_data, room=room_id)
 
 
 @sio.event
@@ -510,3 +647,64 @@ async def portal_mode_changed(sid, data):
         "active": active,
         "meeting": meeting,
     }, room=room_id, skip_sid=sid)
+
+
+@sio.event
+async def raise_hand(sid, data=None):
+    try:
+        session = await sio.get_session(sid)
+    except (KeyError, Exception):
+        return
+    room_id = session.get("current_room")
+    if not room_id:
+        return
+    await sio.emit("peer_hand_raised", {
+        "sid": sid,
+        "user": session.get("full_name"),
+        "campus": session.get("campus"),
+        "role": session.get("role"),
+        "raised": True,
+    }, room=room_id, skip_sid=sid)
+    print(f"[Backend] hand_raised: {session.get('full_name')} in {room_id}")
+
+
+@sio.event
+async def lower_hand(sid, data=None):
+    try:
+        session = await sio.get_session(sid)
+    except (KeyError, Exception):
+        return
+    room_id = session.get("current_room")
+    if not room_id:
+        return
+    await sio.emit("peer_hand_raised", {
+        "sid": sid,
+        "user": session.get("full_name"),
+        "campus": session.get("campus"),
+        "role": session.get("role"),
+        "raised": False,
+    }, room=room_id, skip_sid=sid)
+    print(f"[Backend] hand_lowered: {session.get('full_name')} in {room_id}")
+
+
+@sio.event
+async def send_reaction(sid, data):
+    try:
+        session = await sio.get_session(sid)
+    except (KeyError, Exception):
+        return
+    room_id = session.get("current_room")
+    if not room_id:
+        return
+
+    emoji = data.get("emoji")
+    if not emoji or len(emoji) > 10:
+        return
+
+    await sio.emit("peer_reaction", {
+        "sid": sid,
+        "user": session.get("full_name"),
+        "campus": session.get("campus"),
+        "emoji": emoji,
+    }, room=room_id, skip_sid=sid)
+    print(f"[Backend] reaction: {session.get('full_name')} -> {emoji} in {room_id}")

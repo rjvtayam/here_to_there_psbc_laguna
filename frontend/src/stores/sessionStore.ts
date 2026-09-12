@@ -1,6 +1,21 @@
 import { create } from 'zustand';
 import { RoomUser } from '../types/session';
 
+export interface ChatMessage {
+  id?: string;
+  sid: string;
+  user: string;
+  campus: string;
+  role: string;
+  message: string;
+  target: string;
+  campus_scope?: string;
+  timestamp: string;
+  reply_to_id?: string;
+  reply_to_user?: string;
+  reply_to_message?: string;
+}
+
 interface SessionState {
   currentRoom: string | null;
   roomUsers: RoomUser[];
@@ -8,25 +23,48 @@ interface SessionState {
   emergencyMessage: string | null;
   emergencyTriggeredBy: string | null;
   emergencyTriggeredByRole: string | null;
+  emergencyTriggeredBySid: string | null;
   emergencyCampus: string | null;
   emergencyCampusOnly: boolean;
   portalMode: boolean;
   meetingMode: boolean;
   remotePortalModes: Record<string, boolean>;
   remoteMeetingModes: Record<string, boolean>;
+  remoteVideoOff: Record<string, boolean>;
+  remoteAudioMuted: Record<string, boolean>;
+  raisedHands: Record<string, boolean>;
+  floatingReactions: Array<{ id: number; sid: string; emoji: string; x: number }>;
   screenSharerSid: string | null;
+  chatMessages: ChatMessage[];
+  unreadAllCount: number;
+  unreadCampusCount: number;
+  unreadNotificationCount: number;
   setCurrentRoom: (roomId: string | null) => void;
   setRoomUsers: (users: RoomUser[]) => void;
   addRoomUser: (user: RoomUser) => void;
   removeRoomUser: (sid: string) => void;
   updateUserStream: (sid: string, stream: MediaStream) => void;
-  setEmergency: (active: boolean, message?: string, triggeredBy?: string, triggeredByRole?: string, campus?: string, campusOnly?: boolean) => void;
+  setEmergency: (active: boolean, message?: string, triggeredBy?: string, triggeredByRole?: string, campus?: string, campusOnly?: boolean, triggeredBySid?: string) => void;
   togglePortalMode: () => void;
   setPortalMode: (active: boolean) => void;
   setMeetingMode: (active: boolean) => void;
   setRemotePortalMode: (sid: string, active: boolean) => void;
   setRemoteMeetingMode: (sid: string, active: boolean) => void;
+  setRemoteVideoOff: (sid: string, videoOff: boolean) => void;
+  setRemoteAudioMuted: (sid: string, muted: boolean) => void;
+  setRaisedHand: (sid: string, raised: boolean) => void;
+  clearRaisedHands: () => void;
+  addFloatingReaction: (sid: string, emoji: string) => void;
+  removeFloatingReaction: (id: number) => void;
   setScreenSharer: (sid: string | null) => void;
+  addChatMessage: (msg: ChatMessage) => void;
+  clearChatMessages: () => void;
+  incrementUnreadChat: (target: 'all' | 'campus') => void;
+  setUnreadChat: (target: 'all' | 'campus', count: number) => void;
+  clearUnreadChat: (target?: 'all' | 'campus') => void;
+  incrementNotification: () => void;
+  setNotificationCount: (count: number) => void;
+  clearNotificationCount: () => void;
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -36,13 +74,22 @@ export const useSessionStore = create<SessionState>((set) => ({
   emergencyMessage: null,
   emergencyTriggeredBy: null,
   emergencyTriggeredByRole: null,
+  emergencyTriggeredBySid: null,
   emergencyCampus: null,
   emergencyCampusOnly: false,
   portalMode: true,
   meetingMode: false,
   remotePortalModes: {},
   remoteMeetingModes: {},
+  remoteVideoOff: {},
+  remoteAudioMuted: {},
+  raisedHands: {},
+  floatingReactions: [],
   screenSharerSid: null,
+  chatMessages: [],
+  unreadAllCount: 0,
+  unreadCampusCount: 0,
+  unreadNotificationCount: 0,
 
   setCurrentRoom: (roomId) => set({ currentRoom: roomId }),
 
@@ -65,8 +112,8 @@ export const useSessionStore = create<SessionState>((set) => ({
       ),
     })),
 
-  setEmergency: (active, message, triggeredBy, triggeredByRole, campus, campusOnly) =>
-    set({ isEmergency: active, emergencyMessage: message || null, emergencyTriggeredBy: triggeredBy || null, emergencyTriggeredByRole: triggeredByRole || null, emergencyCampus: campus || null, emergencyCampusOnly: campusOnly ?? false }),
+  setEmergency: (active, message, triggeredBy, triggeredByRole, campus, campusOnly, triggeredBySid) =>
+    set({ isEmergency: active, emergencyMessage: message || null, emergencyTriggeredBy: triggeredBy || null, emergencyTriggeredByRole: triggeredByRole || null, emergencyTriggeredBySid: triggeredBySid || null, emergencyCampus: campus || null, emergencyCampusOnly: campusOnly ?? false }),
 
   togglePortalMode: () =>
     set((state) => ({ portalMode: !state.portalMode })),
@@ -85,5 +132,69 @@ export const useSessionStore = create<SessionState>((set) => ({
       remoteMeetingModes: { ...state.remoteMeetingModes, [sid]: active },
     })),
 
+  setRemoteVideoOff: (sid, videoOff) =>
+    set((state) => ({
+      remoteVideoOff: { ...state.remoteVideoOff, [sid]: videoOff },
+    })),
+
+  setRemoteAudioMuted: (sid, muted) =>
+    set((state) => ({
+      remoteAudioMuted: { ...state.remoteAudioMuted, [sid]: muted },
+    })),
+
+  setRaisedHand: (sid, raised) =>
+    set((state) => ({
+      raisedHands: { ...state.raisedHands, [sid]: raised },
+    })),
+
+  clearRaisedHands: () => set({ raisedHands: {} }),
+
+  addFloatingReaction: (sid, emoji) =>
+    set((state) => {
+      const id = Date.now() + Math.random();
+      const x = 20 + Math.random() * 60;
+      return {
+        floatingReactions: [...state.floatingReactions.slice(-15), { id, sid, emoji, x }],
+      };
+    }),
+
+  removeFloatingReaction: (id) =>
+    set((state) => ({
+      floatingReactions: state.floatingReactions.filter((r) => r.id !== id),
+    })),
+
   setScreenSharer: (sid) => set({ screenSharerSid: sid }),
+
+  addChatMessage: (msg) =>
+    set((state) => ({
+      chatMessages: [...state.chatMessages.slice(-199), msg],
+    })),
+
+  clearChatMessages: () => set({ chatMessages: [] }),
+
+  incrementUnreadChat: (target) =>
+    set((state) => target === 'campus'
+      ? { unreadCampusCount: state.unreadCampusCount + 1 }
+      : { unreadAllCount: state.unreadAllCount + 1 }),
+
+  setUnreadChat: (target, count) =>
+    set(() => target === 'campus'
+      ? { unreadCampusCount: count }
+      : { unreadAllCount: count }),
+
+  clearUnreadChat: (target) =>
+    set(() => {
+      if (target === 'campus') return { unreadCampusCount: 0 };
+      if (target === 'all') return { unreadAllCount: 0 };
+      return { unreadAllCount: 0, unreadCampusCount: 0 };
+    }),
+
+  incrementNotification: () =>
+    set((state) => ({ unreadNotificationCount: state.unreadNotificationCount + 1 })),
+
+  setNotificationCount: (count) =>
+    set({ unreadNotificationCount: count }),
+
+  clearNotificationCount: () =>
+    set({ unreadNotificationCount: 0 }),
 }));

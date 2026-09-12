@@ -6,21 +6,40 @@ import { useSocket } from '../../hooks/useSocket';
 
 interface EmergencyButtonProps {
   onClick: () => void;
+  onDismiss?: () => void;
   disabled?: boolean;
 }
 
-export function EmergencyButton({ onClick, disabled }: EmergencyButtonProps) {
+export function EmergencyButton({ onClick, onDismiss, disabled }: EmergencyButtonProps) {
+  const { isEmergency, emergencyTriggeredBySid } = useSessionStore();
+  const { user } = useAuthStore();
+  const mySid = useSocket().socket?.id;
+  const isAdmin = user?.role === 'admin';
+  const isTriggerer = isEmergency && (mySid === emergencyTriggeredBySid || isAdmin);
+
+  if (isEmergency && isTriggerer) {
+    return (
+      <button
+        onClick={onDismiss}
+        className="flex items-center gap-1.5 font-bold py-1.5 px-2.5 sm:px-3 rounded-lg text-xs transition-colors duration-200 bg-white/15 hover:bg-white/25 text-white border border-white/20"
+      >
+        <X size={13} />
+        Dismiss
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || isEmergency}
       data-demo="btn-emergency"
       className={`flex items-center gap-1.5 font-bold py-1.5 px-2.5 sm:px-3 rounded-lg text-xs transition-colors duration-200 ${
-        disabled
+        disabled || isEmergency
           ? 'bg-gray-800 text-gray-600 border border-gray-700/30 cursor-not-allowed opacity-50'
           : 'bg-red-600 hover:bg-red-700 text-white'
       }`}
-      title={disabled ? 'Disabled during Live Portal' : undefined}
+      title={disabled ? 'Disabled during Live Portal' : isEmergency ? 'Emergency already active' : undefined}
     >
       <AlertTriangle size={13} />
       Emergency
@@ -29,10 +48,12 @@ export function EmergencyButton({ onClick, disabled }: EmergencyButtonProps) {
 }
 
 export function EmergencyAlert() {
-  const { emergencyMessage, emergencyTriggeredBy, emergencyTriggeredByRole, emergencyCampus, emergencyCampusOnly, setEmergency } = useSessionStore();
+  const { emergencyMessage, emergencyTriggeredBy, emergencyTriggeredByRole, emergencyTriggeredBySid, emergencyCampus, emergencyCampusOnly, setEmergency } = useSessionStore();
   const { user } = useAuthStore();
   const { emit } = useSocket();
-  const canDismiss = user?.role === 'admin' || user?.role === 'principal';
+  const mySid = useSocket().socket?.id;
+  const isAdmin = user?.role === 'admin';
+  const isTriggerer = mySid === emergencyTriggeredBySid || isAdmin;
 
   useEffect(() => {
     console.log('%c[EmergencyAlert] ✅ MOUNTED — Banner is now visible!', 'color: red; font-weight: bold; font-size: 14px;', {
@@ -84,7 +105,7 @@ export function EmergencyAlert() {
           </div>
 
           {/* Right: dismiss button */}
-          {canDismiss && (
+          {isTriggerer && (
             <button
               onClick={handleDismiss}
               className="flex-shrink-0 flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg transition-colors duration-200 backdrop-blur-sm border border-white/20 text-xs sm:text-sm"

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Button } from '../../components/ui/button';
-import { Volume2, VolumeX, Mic, MicOff, RefreshCw, AudioLines, Speaker } from 'lucide-react';
+import { Volume2, VolumeX, Mic, MicOff, RefreshCw, AudioLines, Speaker, Zap, CheckCircle2 } from 'lucide-react';
+import { useSettingsStore } from '../../stores/settingsStore';
+import { usePeerStore } from '../../stores/peerStore';
 
 export function AudioSettings() {
   const [inputDevices, setInputDevices] = useState<MediaDeviceInfo[]>([]);
@@ -12,9 +14,17 @@ export function AudioSettings() {
   const [micLevel, setMicLevel] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [switching, setSwitching] = useState(false);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  const storeSelectedMicId = useSettingsStore((s) => s.selectedMicId);
+  const setSelectedMicId = useSettingsStore((s) => s.setSelectedMicId);
+  const storeSelectedSpeakerId = useSettingsStore((s) => s.selectedSpeakerId);
+  const setSelectedSpeakerId = useSettingsStore((s) => s.setSelectedSpeakerId);
+  const localStream = usePeerStore((s) => s.localStream);
+  const switchMicrophone = usePeerStore((s) => s.switchMicrophone);
 
   useEffect(() => {
     loadDevices();
@@ -23,13 +33,26 @@ export function AudioSettings() {
     };
   }, []);
 
+  useEffect(() => {
+    if (storeSelectedMicId) setSelectedInput(storeSelectedMicId);
+    if (storeSelectedSpeakerId) setSelectedOutput(storeSelectedSpeakerId);
+  }, [storeSelectedMicId, storeSelectedSpeakerId]);
+
   const loadDevices = async () => {
     setIsRefreshing(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((s) => s.getTracks().forEach((t) => t.stop()));
       const allDevices = await navigator.mediaDevices.enumerateDevices();
-      setInputDevices(allDevices.filter((d) => d.kind === 'audioinput'));
-      setOutputDevices(allDevices.filter((d) => d.kind === 'audiooutput'));
+      const inputs = allDevices.filter((d) => d.kind === 'audioinput');
+      const outputs = allDevices.filter((d) => d.kind === 'audiooutput');
+      setInputDevices(inputs);
+      setOutputDevices(outputs);
+      if (inputs.length > 0 && !selectedInput) {
+        setSelectedInput(storeSelectedMicId || inputs[0].deviceId);
+      }
+      if (outputs.length > 0 && !selectedOutput) {
+        setSelectedOutput(storeSelectedSpeakerId || outputs[0].deviceId);
+      }
     } catch (err) {
       console.error('Failed to enumerate audio devices:', err);
     } finally {
@@ -83,10 +106,23 @@ export function AudioSettings() {
     setIsMuted(!isMuted);
   };
 
+  const applyMicLive = async () => {
+    if (!selectedInput || !localStream) return;
+    setSwitching(true);
+    try {
+      await switchMicrophone(selectedInput);
+      setSelectedMicId(selectedInput);
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  const currentMicLabel = localStream?.getAudioTracks()[0]?.label || 'None';
+  const isInRoom = !!localStream;
+
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
-        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center">
             <AudioLines size={20} className="text-purple-400" />
@@ -97,7 +133,13 @@ export function AudioSettings() {
           </div>
         </div>
 
-        {/* Microphone Section */}
+        {isInRoom && (
+          <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-xs">
+            <Zap size={14} />
+            <span>Live in room — changes apply immediately to your audio stream</span>
+          </div>
+        )}
+
         <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
           <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
             <Mic size={16} className="text-purple-400" />
@@ -109,7 +151,6 @@ export function AudioSettings() {
             )}
           </div>
           <div className="p-5 space-y-5">
-            {/* Device selector */}
             <div>
               <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Input Device</label>
               <select
@@ -124,7 +165,6 @@ export function AudioSettings() {
               </select>
             </div>
 
-            {/* Audio Level Meter */}
             <div>
               <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Input Level</label>
               <div className="h-4 bg-gray-800 rounded-full overflow-hidden border border-gray-700/50">
@@ -140,8 +180,7 @@ export function AudioSettings() {
               <p className="text-xs text-gray-600 mt-1.5">{isTestingMic ? `Level: ${Math.round(micLevel * 100)}%` : 'Click "Test Microphone" to start'}</p>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               {!isTestingMic ? (
                 <Button onClick={startMicTest} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
                   <Mic size={16} className="mr-2" />Test Microphone
@@ -156,10 +195,24 @@ export function AudioSettings() {
                 {isMuted ? 'Unmute' : 'Mute'}
               </Button>
             </div>
+
+            {isInRoom && selectedInput && selectedInput !== storeSelectedMicId && (
+              <div className="pt-2 border-t border-gray-800/60">
+                <Button onClick={applyMicLive} disabled={switching} size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500">
+                  {switching ? <RefreshCw size={12} className="mr-1.5 animate-spin" /> : <Zap size={12} className="mr-1.5" />}
+                  {switching ? 'Switching...' : 'Switch Live Microphone'}
+                </Button>
+              </div>
+            )}
+            {storeSelectedMicId && (
+              <div className="flex items-center gap-1.5 text-[11px] text-green-400">
+                <CheckCircle2 size={12} />
+                Active: {currentMicLabel}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Speaker Section */}
         <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
           <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
             <Speaker size={16} className="text-cyan-400" />
@@ -169,7 +222,10 @@ export function AudioSettings() {
             <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Output Device</label>
             <select
               value={selectedOutput}
-              onChange={(e) => setSelectedOutput(e.target.value)}
+              onChange={(e) => {
+                setSelectedOutput(e.target.value);
+                setSelectedSpeakerId(e.target.value);
+              }}
               className="w-full bg-gray-800/80 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 focus:outline-none transition-all"
             >
               {outputDevices.map((d) => (
@@ -177,10 +233,15 @@ export function AudioSettings() {
               ))}
               {outputDevices.length === 0 && <option value="">No speakers detected</option>}
             </select>
+            {storeSelectedSpeakerId && (
+              <div className="mt-2 flex items-center gap-1.5 text-[11px] text-green-400">
+                <CheckCircle2 size={12} />
+                Output saved
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Refresh */}
         <Button variant="ghost" onClick={loadDevices}>
           <RefreshCw size={16} className={`mr-2 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />Refresh Devices
         </Button>

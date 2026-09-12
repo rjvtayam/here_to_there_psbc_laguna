@@ -14,6 +14,8 @@ class AnnouncementService:
         announcement = Announcement(
             title=data.title,
             content=data.content,
+            link=data.link,
+            image_url=data.image_url,
             type=data.type,
             target_campus=data.target_campus,
             created_by=created_by,

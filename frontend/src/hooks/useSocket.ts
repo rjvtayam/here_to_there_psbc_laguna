@@ -2,7 +2,10 @@ import { useEffect, useCallback, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
 import { useSessionStore } from '../stores/sessionStore';
+import { useSettingsStore } from '../stores/settingsStore';
 import { SOCKET_URL } from '../lib/constants';
+import { pushNotification } from '../components/ui/NotificationToast';
+import { notificationsApi } from '../api/notifications.api';
 
 let socket: Socket | null = null;
 let pendingEvents: Array<{ event: string; data?: any }> = [];
@@ -26,6 +29,18 @@ function initSocket(token: string, setRoomUsers: any, setEmergency: any) {
       const pending = pendingEvents.shift()!;
       console.log('[Socket] Flushing pending event:', pending.event);
       socket?.emit(pending.event, pending.data);
+    }
+    notificationsApi.getUnreadCount().then((count) => {
+      useSessionStore.getState().setNotificationCount(count);
+    }).catch(() => {});
+
+    const autoReconnect = useSettingsStore.getState().autoReconnect;
+    if (autoReconnect) {
+      const roomId = localStorage.getItem('current_room_id');
+      if (roomId) {
+        console.log('[Socket] Auto-rejoining room:', roomId);
+        socket?.emit('join_room', { room_id: roomId });
+      }
     }
   });
 
@@ -61,13 +76,21 @@ function initSocket(token: string, setRoomUsers: any, setEmergency: any) {
     });
   });
 
-  socket.on('peer_left', ({ sid, user }: { sid: string; user: string }) => {
+  socket.on('peer_left', ({ sid, user, campus, role }: { sid: string; user: string; campus?: string; role?: string }) => {
     console.log(`[Socket] peer_left: ${user} (${sid})`);
     const state = useSessionStore.getState();
+    const leavingUser = state.roomUsers.find((u) => u.sid === sid);
     state.setRoomUsers(state.roomUsers.filter((u) => u.sid !== sid));
     if (state.screenSharerSid === sid) {
       state.setScreenSharer(null);
     }
+    window.dispatchEvent(new CustomEvent('participant_left', {
+      detail: {
+        user: user || leavingUser?.user || 'Unknown',
+        campus: campus || leavingUser?.campus || '',
+        role: role || leavingUser?.role || '',
+      },
+    }));
   });
 
   socket.on('peer_joined', ({ sid, user, campus, role }: { sid: string; user: string; campus: string; role: string }) => {
@@ -76,6 +99,9 @@ function initSocket(token: string, setRoomUsers: any, setEmergency: any) {
     const exists = state.roomUsers.find((u) => u.sid === sid);
     if (!exists) {
       state.addRoomUser({ sid, user, campus, role, stream: undefined });
+      window.dispatchEvent(new CustomEvent('participant_joined', {
+        detail: { user, campus, role },
+      }));
     }
   });
 
@@ -91,23 +117,96 @@ function initSocket(token: string, setRoomUsers: any, setEmergency: any) {
   });
 
   socket.on('screen_share_stopped', ({ sid }: { sid: string }) => {
-    console.log(`[Socket] screen_share_stopped: ${sid}`);
+    console.log('[Socket] screen_share_stopped:', sid);
     const current = useSessionStore.getState().screenSharerSid;
     if (current === sid) {
       useSessionStore.getState().setScreenSharer(null);
     }
   });
 
+  socket.on('peer_video_toggled', ({ sid, video_off }: { sid: string; video_off: boolean }) => {
+    console.log(`[Socket] peer_video_toggled: ${sid} video_off=${video_off}`);
+    useSessionStore.getState().setRemoteVideoOff(sid, video_off);
+  });
+
+  socket.on('peer_muted', ({ sid, muted }: { sid: string; muted: boolean }) => {
+    console.log(`[Socket] peer_muted: ${sid} muted=${muted}`);
+    useSessionStore.getState().setRemoteAudioMuted(sid, muted);
+  });
+
+  socket.on('chat_message', (data) => {
+    console.log('[Socket] chat_message:', data.user, data.message);
+    const state = useSessionStore.getState();
+    const myName = useAuthStore.getState().user?.full_name;
+    state.addChatMessage(data);
+    if (data.user !== myName) {
+      state.incrementUnreadChat(data.target === 'campus' ? 'campus' : 'all');
+    }
+  });
+
+  socket.on('chat_history', (data) => {
+    console.log('[Socket] chat_history:', data.messages?.length, 'messages');
+    const state = useSessionStore.getState();
+    if (data.messages && data.messages.length > 0) {
+      state.clearChatMessages();
+      data.messages.forEach((msg: any) => state.addChatMessage(msg));
+    }
+    state.setUnreadChat('all', 0);
+    state.setUnreadChat('campus', 0);
+  });
+
   socket.on('emergency_alert', (data) => {
     console.log('%c[Socket] ⚠️ EMERGENCY_ALERT RECEIVED:', 'color: red; font-weight: bold; font-size: 14px;', data);
     console.log('[Socket] Current isEmergency:', useSessionStore.getState().isEmergency);
-    setEmergency(true, data.message, data.triggered_by, data.triggered_by_role, data.campus_label, data.campus_only);
+    setEmergency(true, data.message, data.triggered_by, data.triggered_by_role, data.campus_label, data.campus_only, data.triggered_by_sid);
     console.log('[Socket] After setEmergency, isEmergency:', useSessionStore.getState().isEmergency);
+    useSessionStore.getState().incrementNotification();
+    pushNotification({
+      title: 'EMERGENCY',
+      message: data.message || 'Emergency activated',
+      type: 'emergency',
+      created_by: data.triggered_by || 'System',
+    });
   });
 
   socket.on('emergency_dismissed', () => {
     console.log('%c[Socket] ✓ EMERGENCY_DISMISSED', 'color: green; font-weight: bold;');
     setEmergency(false);
+  });
+
+  socket.on('chat_reaction_update', (data) => {
+    console.log('[Socket] chat_reaction_update:', data);
+    const event = new CustomEvent('chat_reaction_update', { detail: data });
+    window.dispatchEvent(event);
+  });
+
+  socket.on('peer_hand_raised', (data) => {
+    console.log('[Socket] peer_hand_raised:', data.user, data.raised);
+    useSessionStore.getState().setRaisedHand(data.sid, data.raised);
+    if (data.raised) {
+      pushNotification({
+        title: 'Hand Raised',
+        message: `${data.user} raised their hand`,
+        type: 'info',
+        created_by: data.user,
+      });
+    }
+  });
+
+  socket.on('peer_reaction', (data) => {
+    console.log('[Socket] peer_reaction:', data.user, data.emoji);
+    useSessionStore.getState().addFloatingReaction(data.sid, data.emoji);
+  });
+
+  socket.on('bulletin_new', (data) => {
+    console.log('[Socket] bulletin_new:', data.title);
+    useSessionStore.getState().incrementNotification();
+    pushNotification({
+      title: data.title || 'New Bulletin',
+      message: data.content || '',
+      type: data.type || 'bulletin',
+      created_by: data.created_by || 'System',
+    });
   });
 
   socket.on('disconnect', (reason) => {
@@ -134,6 +233,9 @@ export function useSocket() {
         socket = null;
         pendingEvents = [];
       }
+      useSessionStore.getState().clearChatMessages();
+      useSessionStore.getState().clearUnreadChat();
+      useSessionStore.getState().clearNotificationCount();
       return;
     }
 

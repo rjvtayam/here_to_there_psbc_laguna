@@ -9,8 +9,9 @@ export function useWebRTC(_roomId: string) {
   const localStreamRef = useRef<MediaStream | null>(null);
   const peersRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const connectedSidsRef = useRef<Set<string>>(new Set());
+  const retryTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   const [streamReady, setStreamReady] = useState(false);
-  const { emit } = useSocket();
+  const { emit, socket } = useSocket();
   const { addPeer, removePeer, updatePeerStream, setLocalStream } = usePeerStore();
   const { updateUserStream, roomUsers } = useSessionStore();
   const talkTarget = usePeerStore((s) => s.talkTarget);
@@ -191,12 +192,28 @@ export function useWebRTC(_roomId: string) {
   );
 
   const toggleAudio = useCallback(() => {
-    usePeerStore.getState().toggleAudio();
-  }, []);
+    const peerState = usePeerStore.getState();
+    const newMuted = !peerState.isAudioMuted;
+    if (peerState.localStream) {
+      peerState.localStream.getAudioTracks().forEach((track) => {
+        track.enabled = !newMuted;
+      });
+    }
+    usePeerStore.setState({ isAudioMuted: newMuted });
+    emit('mute_audio', { muted: newMuted });
+  }, [emit]);
 
   const toggleVideo = useCallback(() => {
-    usePeerStore.getState().toggleVideo();
-  }, []);
+    const peerState = usePeerStore.getState();
+    const newVideoOff = !peerState.isVideoOff;
+    if (peerState.localStream) {
+      peerState.localStream.getVideoTracks().forEach((track) => {
+        track.enabled = newVideoOff;
+      });
+    }
+    usePeerStore.setState({ isVideoOff: newVideoOff });
+    emit('mute_video', { video_off: newVideoOff });
+  }, [emit]);
 
   const shareScreen = useCallback(async () => {
     try {
@@ -280,7 +297,7 @@ export function useWebRTC(_roomId: string) {
       s.off('ice_candidate', handleIceEvent);
       s.off('peer_talk_target', handlePeerTalkTarget);
     };
-  }, [handleOffer, handleAnswer, handleIceCandidate]);
+  }, [handleOffer, handleAnswer, handleIceCandidate, socket]);
 
   useEffect(() => {
     return cleanup;
@@ -306,6 +323,7 @@ export function useWebRTC(_roomId: string) {
         } else {
           console.log(`[WebRTC] Waiting for offer from ${u.user} (${u.sid}), will retry in 3s`);
           const retryTimer = setTimeout(() => {
+            retryTimersRef.current.delete(retryTimer);
             const stillNoPeer = !peersRef.current.has(u.sid) && !connectedSidsRef.current.has(u.sid);
             if (stillNoPeer) {
               console.log(`[WebRTC] Retrying - initiating offer to ${u.user} (${u.sid})`);
@@ -316,7 +334,7 @@ export function useWebRTC(_roomId: string) {
               });
             }
           }, 3000);
-          return () => clearTimeout(retryTimer);
+          retryTimersRef.current.add(retryTimer);
         }
       }
     });
@@ -331,6 +349,16 @@ export function useWebRTC(_roomId: string) {
       console.log(`[WebRTC] Emitting current talk state to room: ${combined}`);
       emit('talk_to', { target: combined });
     }
+
+    const currentVideoOff = usePeerStore.getState().isVideoOff;
+    emit('mute_video', { video_off: currentVideoOff });
+    const currentAudioMuted = usePeerStore.getState().isAudioMuted;
+    emit('mute_audio', { muted: currentAudioMuted });
+
+    return () => {
+      retryTimersRef.current.forEach((t) => clearTimeout(t));
+      retryTimersRef.current.clear();
+    };
   }, [roomUsers, streamReady, createOffer]);
 
   useEffect(() => {

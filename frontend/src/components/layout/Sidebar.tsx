@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
-import { Home, Settings, Users, LogOut, ChevronsLeft, ChevronsRight, X } from 'lucide-react';
+import { Home, Settings, Users, LogOut, ChevronsLeft, ChevronsRight, X, Film } from 'lucide-react';
 
 interface SidebarProps {
   isMobile?: boolean;
@@ -49,6 +49,9 @@ export function Sidebar({ isMobile = false }: SidebarProps) {
             />
             {showUsers && (
               <SidebarLink to="/admin/users" icon={<Users size={18} />} label="Users" isOpen={true} onClick={toggleSidebar} />
+            )}
+            {showUsers && (
+              <SidebarLink to="/control-room/recordings" icon={<Film size={18} />} label="Recordings" isOpen={true} onClick={toggleSidebar} />
             )}
             {(user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'staff' || user?.role === 'principal') && (
               <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={true} onClick={toggleSidebar} />
@@ -105,6 +108,9 @@ export function Sidebar({ isMobile = false }: SidebarProps) {
         />
         {showUsers && (
           <SidebarLink to="/admin/users" icon={<Users size={18} />} label="Users" isOpen={isSidebarOpen} />
+        )}
+        {showUsers && (
+          <SidebarLink to="/control-room/recordings" icon={<Film size={18} />} label="Recordings" isOpen={isSidebarOpen} />
         )}
         {(user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'staff' || user?.role === 'principal') && (
           <SidebarLink to="/control-room/settings" icon={<Settings size={18} />} label="Settings" isOpen={isSidebarOpen} />

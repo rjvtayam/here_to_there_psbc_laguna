@@ -131,10 +131,17 @@ export function SettingsPage() {
               <RefreshCw size={12} className="mr-1.5" />
               Reset
             </Button>
-            <Button onClick={handleSave} size="sm" className="inline-flex items-center whitespace-nowrap bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500 shadow-lg shadow-primary-500/20">
-              <Save size={12} className="mr-1.5" />
-              {saved ? 'Saved!' : 'Save Settings'}
-            </Button>
+            {activeTab === 'profile' && profileSubTab === 'personal' ? (
+              <Button onClick={handleSave} size="sm" className="inline-flex items-center whitespace-nowrap bg-gradient-to-r from-primary-600 to-cyan-600 hover:from-primary-500 hover:to-cyan-500 shadow-lg shadow-primary-500/20">
+                <Save size={12} className="mr-1.5" />
+                {saved ? 'Saved!' : 'Save Profile'}
+              </Button>
+            ) : (
+              <span className="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 border border-green-500/20 px-3 py-2 rounded-lg">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                Applied in real-time
+              </span>
+            )}
           </div>
         )}
       </div>

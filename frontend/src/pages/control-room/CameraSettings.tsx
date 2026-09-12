@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Button } from '../../components/ui/button';
-import { Camera, CameraOff, RefreshCw, Video, Aperture } from 'lucide-react';
+import { Camera, CameraOff, RefreshCw, Video, Aperture, CheckCircle2, Zap } from 'lucide-react';
+import { useSettingsStore } from '../../stores/settingsStore';
+import { usePeerStore } from '../../stores/peerStore';
 
 export function CameraSettings() {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -9,7 +11,13 @@ export function CameraSettings() {
   const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [switching, setSwitching] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const storeSelectedCameraId = useSettingsStore((s) => s.selectedCameraId);
+  const setSelectedCameraId = useSettingsStore((s) => s.setSelectedCameraId);
+  const localStream = usePeerStore((s) => s.localStream);
+  const switchCamera = usePeerStore((s) => s.switchCamera);
 
   useEffect(() => {
     loadDevices();
@@ -24,6 +32,12 @@ export function CameraSettings() {
     }
   }, [previewStream]);
 
+  useEffect(() => {
+    if (storeSelectedCameraId) {
+      setSelectedDevice(storeSelectedCameraId);
+    }
+  }, [storeSelectedCameraId]);
+
   const loadDevices = async () => {
     setIsRefreshing(true);
     try {
@@ -32,7 +46,8 @@ export function CameraSettings() {
       const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
       setDevices(videoDevices);
       if (videoDevices.length > 0 && !selectedDevice) {
-        setSelectedDevice(videoDevices[0].deviceId);
+        const initial = storeSelectedCameraId || videoDevices[0].deviceId;
+        setSelectedDevice(initial);
       }
     } catch (err) {
       console.error('Failed to enumerate devices:', err);
@@ -62,10 +77,23 @@ export function CameraSettings() {
     setPreviewStream(null);
   };
 
+  const applyCameraLive = async () => {
+    if (!selectedDevice || !localStream) return;
+    setSwitching(true);
+    try {
+      await switchCamera(selectedDevice);
+      setSelectedCameraId(selectedDevice);
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  const currentCameraLabel = localStream?.getVideoTracks()[0]?.label || 'None';
+  const isInRoom = !!localStream;
+
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
-        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center">
             <Camera size={20} className="text-cyan-400" />
@@ -76,7 +104,13 @@ export function CameraSettings() {
           </div>
         </div>
 
-        {/* Preview */}
+        {isInRoom && (
+          <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-xs">
+            <Zap size={14} />
+            <span>Live in room — changes apply immediately to your video stream</span>
+          </div>
+        )}
+
         <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 overflow-hidden">
           <div className="p-4 border-b border-gray-800/60 flex items-center gap-2">
             <Video size={16} className="text-cyan-400" />
@@ -103,7 +137,6 @@ export function CameraSettings() {
           </div>
         </div>
 
-        {/* Device Selector */}
         <div className="bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-800/60 p-5">
           <div className="flex items-center gap-2 mb-4">
             <Camera size={16} className="text-cyan-400" />
@@ -122,9 +155,22 @@ export function CameraSettings() {
             {devices.length === 0 && <option value="">No cameras detected</option>}
           </select>
           <p className="text-xs text-gray-600 mt-2">{devices.length} device(s) found</p>
+          {isInRoom && selectedDevice && selectedDevice !== storeSelectedCameraId && (
+            <div className="mt-3 flex items-center gap-2">
+              <Button onClick={applyCameraLive} disabled={switching} size="sm" className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500">
+                {switching ? <RefreshCw size={12} className="mr-1.5 animate-spin" /> : <Zap size={12} className="mr-1.5" />}
+                {switching ? 'Switching...' : 'Switch Live Camera'}
+              </Button>
+            </div>
+          )}
+          {storeSelectedCameraId && (
+            <div className="mt-2 flex items-center gap-1.5 text-[11px] text-green-400">
+              <CheckCircle2 size={12} />
+              Active: {currentCameraLabel}
+            </div>
+          )}
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-3">
           <Button onClick={startPreview} disabled={isTesting} className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500">
             <Camera size={16} className="mr-2" />

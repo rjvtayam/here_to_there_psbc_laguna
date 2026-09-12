@@ -11,6 +11,9 @@ export interface SettingsState {
   lowLatency: boolean;
   notifications: boolean;
   darkMode: boolean;
+  selectedCameraId: string;
+  selectedMicId: string;
+  selectedSpeakerId: string;
   setHdVideo: (v: boolean) => void;
   setMirrorVideo: (v: boolean) => void;
   setHdAudio: (v: boolean) => void;
@@ -21,6 +24,9 @@ export interface SettingsState {
   setLowLatency: (v: boolean) => void;
   setNotifications: (v: boolean) => void;
   setDarkMode: (v: boolean) => void;
+  setSelectedCameraId: (id: string) => void;
+  setSelectedMicId: (id: string) => void;
+  setSelectedSpeakerId: (id: string) => void;
   loadSettings: () => void;
   saveSettings: () => void;
   getVideoConstraints: () => MediaTrackConstraints;
@@ -52,25 +58,44 @@ const defaults = {
   lowLatency: true,
   notifications: true,
   darkMode: true,
+  selectedCameraId: '',
+  selectedMicId: '',
+  selectedSpeakerId: '',
 };
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   ...defaults,
 
-  setHdVideo: (v) => set({ hdVideo: v }),
-  setMirrorVideo: (v) => set({ mirrorVideo: v }),
-  setHdAudio: (v) => set({ hdAudio: v }),
-  setEchoCancellation: (v) => set({ echoCancellation: v }),
-  setNoiseSuppression: (v) => set({ noiseSuppression: v }),
-  setAutoGainControl: (v) => set({ autoGainControl: v }),
-  setAutoReconnect: (v) => set({ autoReconnect: v }),
-  setLowLatency: (v) => set({ lowLatency: v }),
-  setNotifications: (v) => set({ notifications: v }),
-  setDarkMode: (v) => set({ darkMode: v }),
+  setHdVideo: (v) => { set({ hdVideo: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setMirrorVideo: (v) => { set({ mirrorVideo: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setHdAudio: (v) => { set({ hdAudio: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setEchoCancellation: (v) => { set({ echoCancellation: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setNoiseSuppression: (v) => { set({ noiseSuppression: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setAutoGainControl: (v) => { set({ autoGainControl: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setAutoReconnect: (v) => { set({ autoReconnect: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setLowLatency: (v) => { set({ lowLatency: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setNotifications: (v) => { set({ notifications: v }); setTimeout(() => saveToStorage(get()), 0); },
+  setDarkMode: (v) => {
+    set({ darkMode: v });
+    setTimeout(() => saveToStorage(get()), 0);
+    if (v) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  },
+  setSelectedCameraId: (id) => { set({ selectedCameraId: id }); setTimeout(() => saveToStorage(get()), 0); },
+  setSelectedMicId: (id) => { set({ selectedMicId: id }); setTimeout(() => saveToStorage(get()), 0); },
+  setSelectedSpeakerId: (id) => { set({ selectedSpeakerId: id }); setTimeout(() => saveToStorage(get()), 0); },
 
   loadSettings: () => {
     const saved = loadFromStorage();
     set({ ...defaults, ...saved });
+    if (get().darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   },
 
   saveSettings: () => {
@@ -78,15 +103,28 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   getVideoConstraints: () => {
-    const { hdVideo } = get();
+    const { hdVideo, lowLatency, selectedCameraId } = get();
+    const deviceConstraint: MediaTrackConstraints = selectedCameraId
+      ? { deviceId: { exact: selectedCameraId } }
+      : {};
+    if (lowLatency) {
+      return {
+        ...deviceConstraint,
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        frameRate: { ideal: 15 },
+      };
+    }
     if (hdVideo) {
       return {
+        ...deviceConstraint,
         width: { ideal: 1280 },
         height: { ideal: 720 },
         frameRate: { ideal: 30 },
       };
     }
     return {
+      ...deviceConstraint,
       width: { ideal: 640 },
       height: { ideal: 480 },
       frameRate: { ideal: 24 },
@@ -94,9 +132,13 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   getAudioConstraints: () => {
-    const { hdAudio, echoCancellation, noiseSuppression, autoGainControl } = get();
+    const { hdAudio, echoCancellation, noiseSuppression, autoGainControl, lowLatency, selectedMicId } = get();
+    const deviceConstraint: MediaTrackConstraints = selectedMicId
+      ? { deviceId: { exact: selectedMicId } }
+      : {};
     return {
-      sampleRate: hdAudio ? { ideal: 48000 } : { ideal: 16000 },
+      ...deviceConstraint,
+      sampleRate: lowLatency ? { ideal: 16000 } : hdAudio ? { ideal: 48000 } : { ideal: 16000 },
       echoCancellation,
       noiseSuppression,
       autoGainControl,

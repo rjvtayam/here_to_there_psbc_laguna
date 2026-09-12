@@ -5,6 +5,8 @@ export const announcementsApi = {
   create: async (data: {
     title: string;
     content?: string;
+    link?: string;
+    image_url?: string;
     type?: string;
     target_campus?: string;
   }): Promise<Announcement> => {

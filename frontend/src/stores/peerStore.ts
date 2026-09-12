@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { PeerConnection } from '../types/webrtc';
+import { useSettingsStore } from './settingsStore';
 
 interface PeerState {
   peers: Map<string, PeerConnection>;
@@ -21,6 +22,10 @@ interface PeerState {
   setTalkTarget: (target: 'paete' | 'pagsanjan' | null) => void;
   setLocalMicActive: (active: boolean) => void;
   getCombinedTarget: () => 'paete' | 'pagsanjan' | 'both' | 'local' | null;
+  applyAudioSettings: () => void;
+  replaceVideoStream: (newStream: MediaStream) => void;
+  switchCamera: (deviceId: string) => Promise<void>;
+  switchMicrophone: (deviceId: string) => Promise<void>;
 }
 
 export const usePeerStore = create<PeerState>((set, get) => ({
@@ -115,5 +120,96 @@ export const usePeerStore = create<PeerState>((set, get) => ({
     if (talkTarget) return talkTarget;
     if (localMicActive) return 'local';
     return null;
+  },
+
+  applyAudioSettings: () => {
+    const { localStream } = get();
+    if (!localStream) return;
+    const audioConstraints = useSettingsStore.getState().getAudioConstraints();
+    localStream.getAudioTracks().forEach((track) => {
+      track.applyConstraints(audioConstraints).catch((err) => {
+        console.warn('[PeerStore] Failed to apply audio constraints:', err);
+      });
+    });
+  },
+
+  replaceVideoStream: (newStream: MediaStream) => {
+    const { localStream, peers } = get();
+    const newVideoTrack = newStream.getVideoTracks()[0];
+    if (!newVideoTrack) return;
+
+    peers.forEach((peer) => {
+      const sender = peer.connection.getSenders().find((s) => s.track?.kind === 'video');
+      if (sender) {
+        sender.replaceTrack(newVideoTrack).catch((err) => {
+          console.warn('[PeerStore] Failed to replace video track:', err);
+        });
+      }
+    });
+
+    if (localStream) {
+      localStream.getVideoTracks().forEach((t) => { t.stop(); });
+      const newTracks = [...localStream.getAudioTracks(), ...newStream.getVideoTracks()];
+      const merged = new MediaStream(newTracks);
+      set({ localStream: merged });
+    } else {
+      set({ localStream: newStream });
+    }
+  },
+
+  switchCamera: async (deviceId: string) => {
+    const { localStream, peers } = get();
+    if (!localStream) return;
+    const videoConstraints = useSettingsStore.getState().getVideoConstraints();
+    if (deviceId) videoConstraints.deviceId = { exact: deviceId };
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      if (!newVideoTrack) return;
+
+      peers.forEach((peer) => {
+        const sender = peer.connection.getSenders().find((s) => s.track?.kind === 'video');
+        if (sender) {
+          sender.replaceTrack(newVideoTrack).catch((err) => {
+            console.warn('[PeerStore] Failed to replace video track on peer:', err);
+          });
+        }
+      });
+
+      localStream.getVideoTracks().forEach((t) => { t.stop(); });
+      const merged = new MediaStream([...localStream.getAudioTracks(), newVideoTrack]);
+      set({ localStream: merged });
+      console.log('[PeerStore] Camera switched to device:', deviceId);
+    } catch (err) {
+      console.error('[PeerStore] Failed to switch camera:', err);
+    }
+  },
+
+  switchMicrophone: async (deviceId: string) => {
+    const { localStream, peers } = get();
+    if (!localStream) return;
+    const audioConstraints = useSettingsStore.getState().getAudioConstraints();
+    if (deviceId) audioConstraints.deviceId = { exact: deviceId };
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: audioConstraints });
+      const newAudioTrack = newStream.getAudioTracks()[0];
+      if (!newAudioTrack) return;
+
+      peers.forEach((peer) => {
+        const sender = peer.connection.getSenders().find((s) => s.track?.kind === 'audio');
+        if (sender) {
+          sender.replaceTrack(newAudioTrack).catch((err) => {
+            console.warn('[PeerStore] Failed to replace audio track on peer:', err);
+          });
+        }
+      });
+
+      localStream.getAudioTracks().forEach((t) => { t.stop(); });
+      const merged = new MediaStream([newAudioTrack, ...localStream.getVideoTracks()]);
+      set({ localStream: merged });
+      console.log('[PeerStore] Microphone switched to device:', deviceId);
+    } catch (err) {
+      console.error('[PeerStore] Failed to switch microphone:', err);
+    }
   },
 }));
